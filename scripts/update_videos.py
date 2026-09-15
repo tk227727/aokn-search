@@ -168,7 +168,7 @@ def should_keep(video, channel):
 
                 # ReGLOSS:
     # 3分（180秒）以下の動画は検索対象から除外する
-    duration_seconds = parse_iso8601_duration(
+    duration_seconds = iso_duration_to_seconds(
         video.get("contentDetails", {}).get("duration", "PT0S")
     )
 
