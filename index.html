@@ -57,16 +57,59 @@ const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function timeToSeconds(t){return t.split(":").map(Number).reduce((a,n)=>a*60+n,0)}
 function fmt(sec){const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=Math.floor(sec%60);return h?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${m}:${String(s).padStart(2,"0")}`}
+function cleanTranscriptText(text){
+  let t=text.replace(/\s+/g," ").trim();
+  if(!t) return "";
+
+  // youtube-transcript.ai の自動字幕で発生する、
+  // 長い連続フレーズの機械的な2～3重複を除去する。
+  const tokens=t.split(" ").filter(Boolean);
+  const cleaned=[];
+  for(let i=0;i<tokens.length;){
+    let best=0, repeats=1;
+    const maxLen=Math.min(24, Math.floor((tokens.length-i)/2));
+    for(let len=maxLen;len>=2;len--){
+      const a=tokens.slice(i,i+len).join(" ");
+      let r=1;
+      while(i+(r+1)*len<=tokens.length &&
+            tokens.slice(i+r*len,i+(r+1)*len).join(" ")===a) r++;
+      if(r>=2){best=len;repeats=r;break}
+    }
+    if(best){
+      cleaned.push(...tokens.slice(i,i+best));
+      i+=best*repeats;
+    }else{
+      cleaned.push(tokens[i++]);
+    }
+  }
+  t=cleaned.join(" ");
+
+  // スペースの無い日本語の完全な連続重複にも対応。
+  for(let pass=0;pass<4;pass++){
+    t=t.replace(/(.{8,120}?)(?:\s*\1){1,3}/g,"$1");
+  }
+  return t.trim();
+}
 function parseTranscript(raw,video){
  const marker="## Transcript";
  const body=raw.includes(marker)?raw.slice(raw.indexOf(marker)+marker.length):raw;
  const re=/\[((?:\d+:)?\d+:\d{2})\]\s*([\s\S]*?)(?=\n\s*\[((?:\d+:)?\d+:\d{2})\]|\s*$)/g;
  let m,out=[];
  while((m=re.exec(body))!==null){
-   const text=m[2].replace(/\s+/g," ").trim();
+   const text=cleanTranscriptText(m[2]);
    if(text) out.push({...video,time:timeToSeconds(m[1]),text});
  }
  return out;
+}
+function makeSnippet(text,word){
+ const normalized=text.normalize("NFKC").toLowerCase();
+ const q=word.normalize("NFKC").toLowerCase();
+ const pos=normalized.indexOf(q);
+ if(pos<0) return text.slice(0,220);
+ const before=85, after=135;
+ const start=Math.max(0,pos-before);
+ const end=Math.min(text.length,pos+word.length+after);
+ return (start>0?"…":"")+text.slice(start,end)+(end<text.length?"…":"");
 }
 async function loadOne(video){
  const r=await fetch(API(video.videoId),{cache:"no-store"});
@@ -104,7 +147,7 @@ function search(){
  const safeWord=word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
  const rx=new RegExp(safeWord,"gi");
  $("results").innerHTML=matches.map(s=>{
-   const text=esc(s.text).replace(rx,m=>`<mark>${m}</mark>`);
+   const text=esc(makeSnippet(s.text,word)).replace(rx,m=>`<mark>${m}</mark>`);
    const url=`https://www.youtube.com/watch?v=${s.videoId}&t=${Math.floor(s.time)}s`;
    return `<div class="result"><div class="channel ${s.channel}">${esc(s.channelName)}</div><div class="title">${esc(s.title)}</div><div class="time">${fmt(s.time)}</div><div class="text">${text}</div><a class="watch" href="${url}" target="_blank" rel="noopener">▶ この場面からYouTubeで見る</a></div>`;
  }).join("");
