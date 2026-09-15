@@ -1,7 +1,7 @@
 {
   "version": 1,
   "totalVideos": 1327,
-  "checkedVideos": 12,
+  "checkedVideos": 17,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -74,6 +74,36 @@
       "channel": "regloss",
       "status": "success",
       "length": 11935
+    },
+    "2jTo_K_tU6s": {
+      "title": "【#ReGLOSSとラジオ体操】ReGLOSS全員とラジオ体操だー！30日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1568
+    },
+    "_ybDq3b1HJo": {
+      "title": "【#ReGLOSS_1stLive】Documentary of ReGLOSS -Road to “Flashpoint”-",
+      "channel": "regloss",
+      "status": "success",
+      "length": 5963
+    },
+    "6WdD0D4V_Z4": {
+      "title": "【#ReGLOSSとラジオ体操】らではじと一緒にラジオ体操やりませんか？29日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1425
+    },
+    "vPfzAPi0Kwg": {
+      "title": "【 Scritchy Scratchy #03 】スクラッチでお金稼ぎ！ウヒョー！！！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 43879
+    },
+    "wWs-sl0zXqw": {
+      "title": "ReGLOSS 'iCONiC' (音乃瀬奏&一条莉々華) OFFICIAL MV",
+      "channel": "regloss",
+      "status": "success",
+      "length": 2178
     }
   }
 }
