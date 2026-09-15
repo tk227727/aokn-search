@@ -1,0 +1,47 @@
+name: Update Search Index
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # transcript status の約20分後。日本時間 03:40 / 09:40 / 15:40 / 21:40 ごろ
+    - cron: "40 0,6,12,18 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-search-index
+  cancel-in-progress: false
+
+jobs:
+  update-search-index:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build search index
+        run: python scripts/update_search_index.py
+
+      - name: Commit search index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/search-index
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update transcript search index"
+          git pull --rebase
+          git push
