@@ -3,8 +3,16 @@ name: Update Transcript Status
 on:
   workflow_dispatch:
 
+  schedule:
+    # UTC。日本時間では 03:20 / 09:20 / 15:20 / 21:20 ごろ
+    - cron: "20 0,6,12,18 * * *"
+
 permissions:
   contents: write
+
+concurrency:
+  group: update-transcript-status
+  cancel-in-progress: false
 
 jobs:
   update-transcripts:
@@ -35,4 +43,5 @@ jobs:
           fi
 
           git commit -m "Update transcript status"
+          git pull --rebase
           git push
