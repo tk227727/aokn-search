@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>青かなシーン検索</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f6f7fb;
+      color: #222;
+    }
+
+    header {
+      background: linear-gradient(135deg, #65bfff, #ffe16b);
+      padding: 36px 20px 30px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 27px;
+    }
+
+    header p {
+      margin: 8px 0 0;
+      font-size: 14px;
+      opacity: 0.75;
+    }
+
+    main {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .search-box {
+      background: white;
+      padding: 18px;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #64b5f6;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 0 18px;
+      font-size: 15px;
+      font-weight: bold;
+      background: #333;
+      color: white;
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .filter {
+      flex: 1;
+      padding: 10px 5px;
+      background: #eee;
+      color: #555;
+      font-size: 13px;
+    }
+
+    .filter.active {
+      background: #333;
+      color: white;
+    }
+
+    #summary {
+      margin: 22px 2px 12px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .result {
+      background: white;
+      border-radius: 16px;
+      padding: 17px;
+      margin-bottom: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    }
+
+    .channel {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .kanade {
+      color: #c59b00;
+    }
+
+    .ao {
+      color: #168ad5;
+    }
+
+    .title {
+      font-weight: bold;
+      line-height: 1.5;
+    }
+
+    .time {
+      display: inline-block;
+      margin-top: 10px;
+      font-weight: bold;
+      color: #168ad5;
+    }
+
+    .text {
+      margin-top: 10px;
+      line-height: 1.7;
+      font-size: 14px;
+      color: #444;
+    }
+
+    mark {
+      background: #fff0a8;
+      padding: 1px 2px;
+      border-radius: 3px;
+    }
+
+    .watch {
+      display: block;
+      margin-top: 14px;
+      padding: 11px;
+      border-radius: 10px;
+      background: #ff0033;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .empty {
+      text-align: center;
+      color: #888;
+      padding: 45px 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🔎 青かなシーン検索</h1>
+  <p>火威青 × 音乃瀬奏　配信アーカイブ検索</p>
+</header>
+
+<main>
+
+  <div class="search-box">
+
+    <div class="search-row">
+      <input
+        id="search"
+        type="search"
+        placeholder="セリフ・名前などを検索"
+      >
+      <button id="searchButton">検索</button>
+    </div>
+
+    <div class="
