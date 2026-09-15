@@ -1,192 +1,120 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>青かなシーン検索</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f6f7fb;
-      color: #222;
-    }
-
-    header {
-      background: linear-gradient(135deg, #65bfff, #ffe16b);
-      padding: 36px 20px 30px;
-      text-align: center;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 27px;
-    }
-
-    header p {
-      margin: 8px 0 0;
-      font-size: 14px;
-      opacity: 0.75;
-    }
-
-    main {
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    .search-box {
-      background: white;
-      padding: 18px;
-      border-radius: 18px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.07);
-    }
-
-    .search-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    input {
-      flex: 1;
-      min-width: 0;
-      padding: 14px;
-      border: 1px solid #ddd;
-      border-radius: 12px;
-      font-size: 16px;
-      outline: none;
-    }
-
-    input:focus {
-      border-color: #64b5f6;
-    }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 0 18px;
-      font-size: 15px;
-      font-weight: bold;
-      background: #333;
-      color: white;
-    }
-
-    .filters {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-    }
-
-    .filter {
-      flex: 1;
-      padding: 10px 5px;
-      background: #eee;
-      color: #555;
-      font-size: 13px;
-    }
-
-    .filter.active {
-      background: #333;
-      color: white;
-    }
-
-    #summary {
-      margin: 22px 2px 12px;
-      font-size: 14px;
-      color: #666;
-    }
-
-    .result {
-      background: white;
-      border-radius: 16px;
-      padding: 17px;
-      margin-bottom: 12px;
-      box-shadow: 0 3px 12px rgba(0,0,0,0.06);
-    }
-
-    .channel {
-      font-size: 12px;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .kanade {
-      color: #c59b00;
-    }
-
-    .ao {
-      color: #168ad5;
-    }
-
-    .title {
-      font-weight: bold;
-      line-height: 1.5;
-    }
-
-    .time {
-      display: inline-block;
-      margin-top: 10px;
-      font-weight: bold;
-      color: #168ad5;
-    }
-
-    .text {
-      margin-top: 10px;
-      line-height: 1.7;
-      font-size: 14px;
-      color: #444;
-    }
-
-    mark {
-      background: #fff0a8;
-      padding: 1px 2px;
-      border-radius: 3px;
-    }
-
-    .watch {
-      display: block;
-      margin-top: 14px;
-      padding: 11px;
-      border-radius: 10px;
-      background: #ff0033;
-      color: white;
-      text-align: center;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .empty {
-      text-align: center;
-      color: #888;
-      padding: 45px 10px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>青かなシーン検索</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f7fb;color:#222}
+header{background:linear-gradient(135deg,#65bfff,#ffe16b);padding:34px 18px 28px;text-align:center}
+h1{margin:0;font-size:27px} header p{margin:8px 0 0;font-size:14px;opacity:.72}
+main{max-width:760px;margin:auto;padding:18px}
+.card{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.07)}
+.status{font-size:13px;line-height:1.7;margin-bottom:13px;padding:10px 12px;background:#f5f6f8;border-radius:10px}
+.status.ok{background:#ecf9ef}.status.error{background:#fff0f0}
+.row{display:flex;gap:8px}
+input{flex:1;min-width:0;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px;outline:none}
+button{border:0;border-radius:12px;padding:0 18px;font-size:15px;font-weight:700;background:#333;color:#fff}
+.filters{display:flex;gap:8px;margin-top:12px}
+.filter{flex:1;padding:10px 5px;background:#eee;color:#555;font-size:13px}
+.filter.active{background:#333;color:#fff}
+#summary{margin:20px 2px 12px;font-size:14px;color:#666}
+.result{background:#fff;border-radius:16px;padding:17px;margin-bottom:12px;box-shadow:0 3px 12px rgba(0,0,0,.06)}
+.channel{font-size:12px;font-weight:700;margin-bottom:6px}.ao{color:#168ad5}.kanade{color:#b18b00}
+.title{font-weight:700;line-height:1.5}.time{display:inline-block;margin-top:9px;font-weight:700;color:#168ad5}
+.text{margin-top:10px;line-height:1.75;font-size:14px;color:#444;word-break:break-word}
+mark{background:#fff0a8;padding:1px 2px;border-radius:3px}
+.watch{display:block;margin-top:13px;padding:11px;border-radius:10px;background:#ff0033;color:#fff;text-align:center;text-decoration:none;font-weight:700;font-size:14px}
+.empty{text-align:center;color:#888;padding:40px 10px}
+.note{font-size:12px;color:#777;line-height:1.6;margin-top:12px}
+</style>
 </head>
-
 <body>
-
-<header>
-  <h1>🔎 青かなシーン検索</h1>
-  <p>火威青 × 音乃瀬奏　配信アーカイブ検索</p>
-</header>
-
+<header><h1>🔎 青かなシーン検索</h1><p>火威青 × 音乃瀬奏　配信アーカイブ検索</p></header>
 <main>
-
-  <div class="search-box">
-
-    <div class="search-row">
-      <input
-        id="search"
-        type="search"
-        placeholder="セリフ・名前などを検索"
-      >
-      <button id="searchButton">検索</button>
-    </div>
-
-    <div class="
+<div class="card">
+<div id="loadStatus" class="status">字幕データを読み込んでいます…</div>
+<div class="row"><input id="search" type="search" placeholder="例：奏、青、かわいい"><button id="searchButton">検索</button></div>
+<div class="filters">
+<button class="filter active" data-channel="all">すべて</button>
+<button class="filter" data-channel="ao">火威青</button>
+<button class="filter" data-channel="kanade">音乃瀬奏</button>
+</div>
+<div class="note">自動生成字幕のため、名前や固有名詞に誤変換が含まれる場合があります。</div>
+</div>
+<div id="summary">読み込み完了後に検索できます</div>
+<div id="results"></div>
+</main>
+<script>
+const VIDEOS=[
+ {videoId:"4pw9GhX85WQ",channel:"kanade",channelName:"音乃瀬奏",title:"【オフコラボ】ゲリラあおかな【音乃瀬奏・火威青】"},
+ {videoId:"T65Ct4b1Myk",channel:"ao",channelName:"火威青",title:"酒は飲んでも飲まれるな【火威青×音乃瀬奏】"}
+];
+const API=id=>`https://youtube-transcript.ai/transcript/${id}.txt?lang=ja`;
+let scenes=[],currentChannel="all";
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function timeToSeconds(t){return t.split(":").map(Number).reduce((a,n)=>a*60+n,0)}
+function fmt(sec){const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=Math.floor(sec%60);return h?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${m}:${String(s).padStart(2,"0")}`}
+function parseTranscript(raw,video){
+ const marker="## Transcript";
+ const body=raw.includes(marker)?raw.slice(raw.indexOf(marker)+marker.length):raw;
+ const re=/\[((?:\d+:)?\d+:\d{2})\]\s*([\s\S]*?)(?=\n\s*\[((?:\d+:)?\d+:\d{2})\]|\s*$)/g;
+ let m,out=[];
+ while((m=re.exec(body))!==null){
+   const text=m[2].replace(/\s+/g," ").trim();
+   if(text) out.push({...video,time:timeToSeconds(m[1]),text});
+ }
+ return out;
+}
+async function loadOne(video){
+ const r=await fetch(API(video.videoId),{cache:"no-store"});
+ if(!r.ok) throw new Error(`${video.channelName}: HTTP ${r.status}`);
+ const raw=await r.text();
+ const parsed=parseTranscript(raw,video);
+ if(!parsed.length) throw new Error(`${video.channelName}: 字幕を解析できませんでした`);
+ return parsed;
+}
+async function loadAll(){
+ const status=$("loadStatus");
+ const settled=await Promise.allSettled(VIDEOS.map(loadOne));
+ scenes=settled.filter(x=>x.status==="fulfilled").flatMap(x=>x.value);
+ const failed=settled.filter(x=>x.status==="rejected");
+ if(scenes.length && !failed.length){
+   status.className="status ok"; status.textContent=`✓ 2本の字幕を読み込みました（${scenes.length}区間）`;
+   $("summary").textContent="検索ワードを入力してください";
+ }else if(scenes.length){
+   status.className="status error"; status.textContent=`一部だけ読み込みました。${failed.map(x=>x.reason.message).join(" / ")}`;
+   $("summary").textContent="読み込めた動画から検索できます";
+ }else{
+   status.className="status error";
+   status.innerHTML="字幕の自動読み込みに失敗しました。<br>通信先の仕様変更や一時的な制限の可能性があります。";
+   $("summary").textContent="字幕データを読み込めませんでした";
+ }
+}
+function search(){
+ const word=$("search").value.trim(); $("results").innerHTML="";
+ if(!word){$("summary").textContent="検索ワードを入力してください";return}
+ if(!scenes.length){$("summary").textContent="字幕データがまだありません";return}
+ const q=word.normalize("NFKC").toLowerCase();
+ const matches=scenes.filter(s=>(currentChannel==="all"||s.channel===currentChannel)&&s.text.normalize("NFKC").toLowerCase().includes(q));
+ $("summary").textContent=`「${word}」：${matches.length}件見つかりました`;
+ if(!matches.length){$("results").innerHTML='<div class="empty">該当するシーンがありません</div>';return}
+ const safeWord=word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+ const rx=new RegExp(safeWord,"gi");
+ $("results").innerHTML=matches.map(s=>{
+   const text=esc(s.text).replace(rx,m=>`<mark>${m}</mark>`);
+   const url=`https://www.youtube.com/watch?v=${s.videoId}&t=${Math.floor(s.time)}s`;
+   return `<div class="result"><div class="channel ${s.channel}">${esc(s.channelName)}</div><div class="title">${esc(s.title)}</div><div class="time">${fmt(s.time)}</div><div class="text">${text}</div><a class="watch" href="${url}" target="_blank" rel="noopener">▶ この場面からYouTubeで見る</a></div>`;
+ }).join("");
+}
+$("searchButton").addEventListener("click",search);
+$("search").addEventListener("keydown",e=>{if(e.key==="Enter")search()});
+document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{
+ document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active")); b.classList.add("active"); currentChannel=b.dataset.channel; search();
+}));
+loadAll();
+</script>
+</body>
+</html>
