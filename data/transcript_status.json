@@ -1,25 +1,13 @@
 {
   "version": 1,
-  "totalVideos": 1951,
-  "checkedVideos": 5,
+  "totalVideos": 1327,
+  "checkedVideos": 7,
   "videos": {
-    "n2dgums2y7U": {
-      "title": "利きかき氷シロップ🍧 かき氷シロップの味は全部一緒！？ #ReGLOSS #VTuber #shorts",
-      "channel": "regloss",
-      "status": "success",
-      "length": 1321
-    },
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
       "channel": "regloss",
       "status": "success",
       "length": 36416
-    },
-    "VH9GZgCWWWg": {
-      "title": "ReGLOSS AR LIVE \"X-ReCHORD\"　Teaser PV",
-      "channel": "regloss",
-      "status": "http_error",
-      "httpCode": 502
     },
     "_xRh0pnzBlM": {
       "title": "【 #わちゃわちゃカメレオン 】決して見つからない【音乃瀬奏】#ReGLOSS",
@@ -27,11 +15,35 @@
       "status": "success",
       "length": 47943
     },
-    "6cWwVB3eWYY": {
-      "title": "#ReGLOSS3周年 配信まであと1日🎉 ぜひ見にきてくださ〜い！ #轟はじめ #ReGLOSS #VTuber #shorts",
+    "Upeh0pC5kOA": {
+      "title": "【 雑談 】無事MV公開できました～【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 25256
+    },
+    "ra8SCAqWCAg": {
+      "title": "【#ReGLOSSパーク】ご褒美GETなるか！？ 3周年の絆をアトラクションでチェック！",
       "channel": "regloss",
       "status": "success",
-      "length": 1122
+      "length": 15711
+    },
+    "tL_lW4w4RxI": {
+      "title": "【 3周年 】重大告知アリ！思い出の切り抜き見よう～！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 32024
+    },
+    "PeitgWu6Yj8": {
+      "title": "音乃瀬奏 - GREATEST (Official MV)",
+      "channel": "kanade",
+      "status": "success",
+      "length": 575
+    },
+    "6GyLNWfGvs8": {
+      "title": "【 Machine Party 】情破壊ゲーらしいけど大丈夫そう・・・？【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 41600
     }
   }
 }
