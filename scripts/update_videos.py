@@ -164,7 +164,7 @@ def should_keep(video, channel):
         return False
 
     if channel["live_only"]:
-        return is_completed_live(
+        return is_completed_live(video)
 
                 # ReGLOSS:
     # 3分（180秒）以下の動画は検索対象から除外する
