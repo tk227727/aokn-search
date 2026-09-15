@@ -164,11 +164,17 @@ def should_keep(video, channel):
         return False
 
     if channel["live_only"]:
-        return is_completed_live(video)
+        return is_completed_live(
 
-    # ReGLOSS:
-    # 現段階では通常動画と配信を取得。
-    # Shortsの厳密な除外は次の段階で追加する。
+                # ReGLOSS:
+    # 3分（180秒）以下の動画は検索対象から除外する
+    duration_seconds = parse_iso8601_duration(
+        video.get("contentDetails", {}).get("duration", "PT0S")
+    )
+
+    if duration_seconds <= 180:
+        return False
+
     return True
 
 
