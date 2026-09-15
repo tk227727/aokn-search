@@ -98,7 +98,18 @@ def main():
         }
     )
 
-    statuses = old_data.get("videos", {})
+    # 現在の videos.json に存在する動画だけステータスを残す
+current_video_ids = {
+    video.get("videoId")
+    for video in videos
+    if video.get("videoId")
+}
+
+statuses = {
+    video_id: status
+    for video_id, status in old_data.get("videos", {}).items()
+    if video_id in current_video_ids
+}
 
        # 未確認の動画、または一時的なエラーだった動画を選ぶ
     # success は再確認しない
