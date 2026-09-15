@@ -113,8 +113,8 @@ statuses = {
 
        # 未確認の動画、または一時的なエラーだった動画を選ぶ
     # success は再確認しない
-    # http_error / error は次回もう一度試す
-    pending = [
+    # http_error / error は次回もう一度試す  
+　　　　pending = [
         video
         for video in videos
         if (
@@ -123,6 +123,7 @@ statuses = {
             in ("http_error", "error")
         )
     ]
+
 
     selected = pending[:MAX_VIDEOS_PER_RUN]
 
