@@ -1,26 +1,29 @@
 {
   "version": 1,
   "channels": {
+    "regloss": {
+      "name": "ReGLOSS",
+      "handle": "@hololivedev_is",
+      "channelId": "UC10wVt6hoQiwySRhz7RdOUA",
+      "uploadsPlaylistId": "UU10wVt6hoQiwySRhz7RdOUA",
+      "videoCount": 219,
+      "autoUpdate": false
+    },
     "ao": {
       "name": "火威青",
       "handle": "@hiodoshiao",
       "channelId": "UCMGfV7TVTmHhEErVJg1oHBQ",
       "uploadsPlaylistId": "UUMGfV7TVTmHhEErVJg1oHBQ",
-      "videoCount": 445
+      "videoCount": 445,
+      "autoUpdate": true
     },
     "kanade": {
       "name": "音乃瀬奏",
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 663
-    },
-    "regloss": {
-      "name": "ReGLOSS",
-      "handle": "@hololivedev_is",
-      "channelId": "UC10wVt6hoQiwySRhz7RdOUA",
-      "uploadsPlaylistId": "UU10wVt6hoQiwySRhz7RdOUA",
-      "videoCount": 219
+      "videoCount": 663,
+      "autoUpdate": true
     }
   },
   "videos": [
