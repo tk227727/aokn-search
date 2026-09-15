@@ -5,12 +5,15 @@ import urllib.request
 from pathlib import Path
 
 API_KEY = os.environ.get("YOUTUBE_API_KEY")
+VIDEOS_FILE = Path("data/videos.json")
 
 if not API_KEY:
     raise RuntimeError("YOUTUBE_API_KEY が設定されていません")
 
 BASE_URL = "https://www.googleapis.com/youtube/v3"
 
+# 火威青・音乃瀬奏だけ今後も自動更新する。
+# ReGLOSSは現在のdata/videos.jsonに入っている動画を固定して引き継ぐ。
 CHANNELS = [
     {
         "key": "ao",
@@ -24,21 +27,12 @@ CHANNELS = [
         "handle": "@otonosekanade",
         "live_only": True,
     },
-    {
-        "key": "regloss",
-        "name": "ReGLOSS",
-        "handle": "@hololivedev_is",
-        "live_only": False,
-    },
 ]
 
 
 def api_get(endpoint, params):
     params["key"] = API_KEY
-    url = (
-        f"{BASE_URL}/{endpoint}?"
-        + urllib.parse.urlencode(params)
-    )
+    url = f"{BASE_URL}/{endpoint}?" + urllib.parse.urlencode(params)
 
     with urllib.request.urlopen(url) as response:
         return json.loads(response.read().decode("utf-8"))
@@ -54,17 +48,14 @@ def get_channel(handle):
     )
 
     if not data.get("items"):
-        raise RuntimeError(
-            f"チャンネルが見つかりません: {handle}"
-        )
+        raise RuntimeError(f"チャンネルが見つかりません: {handle}")
 
     item = data["items"][0]
 
     return {
         "id": item["id"],
         "title": item["snippet"]["title"],
-        "uploads": item["contentDetails"]
-        ["relatedPlaylists"]["uploads"],
+        "uploads": item["contentDetails"]["relatedPlaylists"]["uploads"],
     }
 
 
@@ -85,9 +76,7 @@ def get_upload_ids(playlist_id):
         data = api_get("playlistItems", params)
 
         for item in data.get("items", []):
-            video_ids.append(
-                item["contentDetails"]["videoId"]
-            )
+            video_ids.append(item["contentDetails"]["videoId"])
 
         page_token = data.get("nextPageToken")
 
@@ -109,21 +98,16 @@ def get_video_details(video_ids):
         data = api_get(
             "videos",
             {
-                "part": (
-                    "snippet,contentDetails,"
-                    "liveStreamingDetails,status"
-                ),
+                "part": "snippet,contentDetails,liveStreamingDetails,status",
                 "id": ",".join(group),
             },
         )
-
         videos.extend(data.get("items", []))
 
     return videos
 
 
 def iso_duration_to_seconds(duration):
-    # PT1H2M3S のような形式を秒に変換
     duration = duration.replace("PT", "")
 
     hours = 0
@@ -158,33 +142,18 @@ def is_completed_live(video):
 
 
 def should_keep(video, channel):
-    if video.get("status", {}).get(
-        "privacyStatus"
-    ) != "public":
+    if video.get("status", {}).get("privacyStatus") != "public":
         return False
 
     if channel["live_only"]:
         return is_completed_live(video)
-
-                # ReGLOSS:
-    # 3分（180秒）以下の動画は検索対象から除外する
-    duration_seconds = iso_duration_to_seconds(
-        video.get("contentDetails", {}).get("duration", "PT0S")
-    )
-
-    if duration_seconds <= 180:
-        return False
 
     return True
 
 
 def normalize_video(video, channel):
     snippet = video["snippet"]
-    duration = video.get(
-        "contentDetails", {}
-    ).get("duration", "PT0S")
-
-    live = is_completed_live(video)
+    duration = video.get("contentDetails", {}).get("duration", "PT0S")
 
     return {
         "videoId": video["id"],
@@ -192,42 +161,66 @@ def normalize_video(video, channel):
         "channel": channel["key"],
         "channelName": channel["name"],
         "publishedAt": snippet["publishedAt"],
-        "durationSeconds":
-            iso_duration_to_seconds(duration),
-        "isLiveArchive": live,
-        "url":
-            f"https://www.youtube.com/watch?v={video['id']}",
+        "durationSeconds": iso_duration_to_seconds(duration),
+        "isLiveArchive": is_completed_live(video),
+        "url": f"https://www.youtube.com/watch?v={video['id']}",
     }
+
+
+def load_fixed_regloss():
+    if not VIDEOS_FILE.exists():
+        raise RuntimeError(
+            "data/videos.json がありません。"
+            "ReGLOSSの固定対象を引き継げないため更新を中止します。"
+        )
+
+    old_data = json.loads(VIDEOS_FILE.read_text(encoding="utf-8"))
+
+    regloss_videos = [
+        video
+        for video in old_data.get("videos", [])
+        if video.get("channel") == "regloss"
+    ]
+
+    regloss_channel = old_data.get("channels", {}).get("regloss")
+
+    if not regloss_videos or not regloss_channel:
+        raise RuntimeError(
+            "現在のdata/videos.jsonからReGLOSS固定データを取得できません。"
+        )
+
+    return regloss_videos, regloss_channel
 
 
 def main():
+    # 実行開始時点のReGLOSS対象をそのまま保存しておく。
+    fixed_regloss, regloss_channel = load_fixed_regloss()
+
+    print("=== ReGLOSS ===")
+    print(f"Fixed videos: {len(fixed_regloss)}")
+    print("ReGLOSSは固定対象のためYouTubeから新規動画を取得しません。")
+
     result = {
         "version": 1,
-        "channels": {},
-        "videos": [],
+        "channels": {
+            "regloss": {
+                **regloss_channel,
+                "videoCount": len(fixed_regloss),
+                "autoUpdate": False,
+            }
+        },
+        "videos": list(fixed_regloss),
     }
 
     for channel in CHANNELS:
-        print(
-            f"\n=== {channel['name']} ==="
-        )
+        print(f"\n=== {channel['name']} ===")
 
-        info = get_channel(
-            channel["handle"]
-        )
+        info = get_channel(channel["handle"])
 
-        print(
-            f"Channel: {info['title']} "
-            f"({info['id']})"
-        )
+        print(f"Channel: {info['title']} ({info['id']})")
 
-        ids = get_upload_ids(
-            info["uploads"]
-        )
-
-        print(
-            f"Uploads: {len(ids)}"
-        )
+        ids = get_upload_ids(info["uploads"])
+        print(f"Uploads: {len(ids)}")
 
         details = get_video_details(ids)
 
@@ -237,47 +230,43 @@ def main():
             if should_keep(video, channel)
         ]
 
-        print(
-            f"Selected: {len(selected)}"
-        )
+        print(f"Selected: {len(selected)}")
 
         result["channels"][channel["key"]] = {
             "name": channel["name"],
             "handle": channel["handle"],
             "channelId": info["id"],
-            "uploadsPlaylistId":
-                info["uploads"],
+            "uploadsPlaylistId": info["uploads"],
             "videoCount": len(selected),
+            "autoUpdate": True,
         }
 
         result["videos"].extend(selected)
+
+    # 念のためvideoIdで重複を除く。
+    unique_videos = {}
+    for video in result["videos"]:
+        video_id = video.get("videoId")
+        if video_id:
+            unique_videos[video_id] = video
+
+    result["videos"] = list(unique_videos.values())
 
     result["videos"].sort(
         key=lambda x: x["publishedAt"],
         reverse=True,
     )
 
-    output = Path("data/videos.json")
-    output.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    VIDEOS_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    output.write_text(
-        json.dumps(
-            result,
-            ensure_ascii=False,
-            indent=2,
-        ),
+    VIDEOS_FILE.write_text(
+        json.dumps(result, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
 
-    print(
-        f"\n保存完了: {output}"
-    )
-    print(
-        f"合計: {len(result['videos'])} 本"
-    )
+    print(f"\n保存完了: {VIDEOS_FILE}")
+    print(f"ReGLOSS固定: {len(fixed_regloss)} 本")
+    print(f"合計: {len(result['videos'])} 本")
 
 
 if __name__ == "__main__":
