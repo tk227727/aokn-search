@@ -100,11 +100,17 @@ def main():
 
     statuses = old_data.get("videos", {})
 
-    # まだ一度も確認していない動画だけを選ぶ
+       # 未確認の動画、または一時的なエラーだった動画を選ぶ
+    # success は再確認しない
+    # http_error / error は次回もう一度試す
     pending = [
         video
         for video in videos
-        if video.get("videoId") not in statuses
+        if (
+            video.get("videoId") not in statuses
+            or statuses.get(video.get("videoId"), {}).get("status")
+            in ("http_error", "error")
+        )
     ]
 
     selected = pending[:MAX_VIDEOS_PER_RUN]
