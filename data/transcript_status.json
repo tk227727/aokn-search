@@ -1,7 +1,7 @@
 {
   "version": 1,
   "totalVideos": 1327,
-  "checkedVideos": 27,
+  "checkedVideos": 32,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -164,6 +164,36 @@
       "channel": "regloss",
       "status": "success",
       "length": 16162
+    },
+    "SIMHtur0V4s": {
+      "title": "【 Scritchy Scratchy #01 】スクラッチでお金稼ぎ！ウヒョー！！！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 56608
+    },
+    "TryonwlbG-k": {
+      "title": "【#ReGLOSSとラジオ体操】ReGLOSSと爽やかな朝を共に！23日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1669
+    },
+    "KufKV-1plg4": {
+      "title": "ReGLOSS - 1st Live \"Flashpoint\" Archive【YouTube Music Weekend 12.0】",
+      "channel": "regloss",
+      "status": "success",
+      "length": 5833
+    },
+    "CKTXdcvy0Qg": {
+      "title": "【 スマブラSP 】参加型！おまえらに３勝利するまで終われません！！！！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 18843
+    },
+    "AdY825SP5Ek": {
+      "title": "【#ReGLOSSとラジオ体操】りりなでとラジオ体操！22日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1710
     }
   }
 }
