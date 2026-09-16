@@ -1,6 +1,7 @@
 import json
 import re
 import time
+import unicodedata
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -9,9 +10,8 @@ VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
-
-# Keep this deliberately small so the existing transcript provider is not hammered.
 MAX_VIDEOS_PER_RUN = 5
+INDEX_VERSION = 2
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt?lang=ja"
 
 
@@ -38,15 +38,10 @@ def fetch_transcript(video_id):
 
 
 def time_to_seconds(value):
-    parts = [int(x) for x in value.split(":")]
     total = 0
-    for n in parts:
+    for n in map(int, value.split(":")):
         total = total * 60 + n
     return total
-
-
-def clean_text(text):
-    return re.sub(r"\s+", " ", text).strip()
 
 
 def parse_transcript(raw):
@@ -57,47 +52,64 @@ def parse_transcript(raw):
     )
     rows = []
     for m in pattern.finditer(body):
-        text = clean_text(m.group(2))
+        text = re.sub(r"\s+", " ", m.group(2)).strip()
         if text:
             rows.append({"t": time_to_seconds(m.group(1)), "x": text})
     return rows
 
 
 def normalize(text):
-    # Browser side also uses NFKC + lowercase. Python's casefold is suitable here.
-    import unicodedata
-    return unicodedata.normalize("NFKC", text).casefold().replace(" ", "")
+    return re.sub(
+        r"\s+", "", unicodedata.normalize("NFKC", text).casefold()
+    )
 
 
-def ngrams(text, n=2):
+def grams(text, n):
     s = normalize(text)
-    return {s[i:i+n] for i in range(max(0, len(s)-n+1)) if s[i:i+n].strip()}
+    if len(s) < n:
+        return set()
+    return {s[i:i+n] for i in range(len(s)-n+1)}
 
 
 def build_video_index(video, rows):
-    # Store no transcript sentences. Only 2-character grams -> timestamps.
-    postings = {}
+    # v2 stores both bigrams and trigrams. Trigrams prevent false positives
+    # such as "かな" and "なで" occurring separately in one long caption row.
+    postings = {"2": {}, "3": {}}
+
     for row in rows:
         sec = int(row["t"])
-        for gram in ngrams(row["x"], 2):
-            postings.setdefault(gram, []).append(sec)
+        for n in (2, 3):
+            bucket = postings[str(n)]
+            for gram in grams(row["x"], n):
+                bucket.setdefault(gram, []).append(sec)
 
-    # Deduplicate timestamps and delta-encode them to keep JSON small.
     compact = {}
-    for gram, times in postings.items():
-        unique = sorted(set(times))
-        if not unique:
-            continue
-        deltas = [unique[0]]
-        deltas.extend(unique[i] - unique[i-1] for i in range(1, len(unique)))
-        compact[gram] = deltas
+    for n, bucket in postings.items():
+        compact[n] = {}
+        for gram, times in bucket.items():
+            unique = sorted(set(times))
+            if not unique:
+                continue
+            deltas = [unique[0]]
+            deltas.extend(unique[i] - unique[i-1] for i in range(1, len(unique)))
+            compact[n][gram] = deltas
 
     return {
-        "version": 1,
+        "version": INDEX_VERSION,
         "videoId": video["videoId"],
         "channel": video["channel"],
         "postings": compact,
     }
+
+
+def needs_rebuild(video_id):
+    path = INDEX_DIR / f"{video_id}.json"
+    if not path.exists():
+        return True
+    try:
+        return load_json(path, {}).get("version", 0) < INDEX_VERSION
+    except Exception:
+        return True
 
 
 def rebuild_catalog(videos):
@@ -113,9 +125,8 @@ def rebuild_catalog(videos):
                 "publishedAt": video.get("publishedAt", ""),
                 "url": video.get("url", ""),
             })
-
     save_json(CATALOG_FILE, {
-        "version": 1,
+        "version": INDEX_VERSION,
         "indexedVideos": len(indexed),
         "videos": indexed,
     })
@@ -126,15 +137,14 @@ def main():
     videos = data.get("videos", [])
     status = load_json(STATUS_FILE, {}).get("videos", {})
 
-    # Prioritize videos whose transcript check already succeeded.
     candidates = [
         v for v in videos
         if status.get(v.get("videoId"), {}).get("status") == "success"
-        and not (INDEX_DIR / f'{v.get("videoId")}.json').exists()
+        and needs_rebuild(v.get("videoId"))
     ][:MAX_VIDEOS_PER_RUN]
 
     print(f"Videos: {len(videos)}")
-    print(f"New indexes this run: {len(candidates)}")
+    print(f"Indexes to build/rebuild this run: {len(candidates)}")
 
     for i, video in enumerate(candidates, 1):
         vid = video["videoId"]
@@ -146,11 +156,11 @@ def main():
                 print("  skipped: transcript could not be parsed")
                 continue
             save_json(INDEX_DIR / f"{vid}.json", build_video_index(video, rows))
-            print(f"  indexed: {len(rows)} transcript sections")
+            print(f"  indexed v{INDEX_VERSION}: {len(rows)} transcript sections")
         except urllib.error.HTTPError as e:
-            print(f"  HTTP {e.code}; will retry on a later run")
+            print(f"  HTTP {e.code}; will retry later")
         except Exception as e:
-            print(f"  error: {str(e)[:300]}; will retry on a later run")
+            print(f"  error: {str(e)[:300]}; will retry later")
         if i < len(candidates):
             time.sleep(3)
 
