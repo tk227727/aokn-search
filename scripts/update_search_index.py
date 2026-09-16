@@ -15,10 +15,24 @@ INDEX_VERSION = 2
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt?lang=ja"
 
 # 最初の字幕取得テストに使った2本。
-# transcript_status.json の確認順を待たず、未作成なら最優先でインデックス化する。
-PRIORITY_VIDEO_IDS = [
-    "4pw9GhX85WQ",  # 音乃瀬奏
-    "T65Ct4b1Myk",  # 火威青
+# videos.json に存在しなくても、特別追加枠として検索対象にする。
+SPECIAL_VIDEOS = [
+    {
+        "videoId": "4pw9GhX85WQ",
+        "title": "最初の字幕取得テスト動画（音乃瀬奏）",
+        "channel": "kanade",
+        "channelName": "音乃瀬奏",
+        "publishedAt": "",
+        "url": "https://www.youtube.com/watch?v=4pw9GhX85WQ",
+    },
+    {
+        "videoId": "T65Ct4b1Myk",
+        "title": "最初の字幕取得テスト動画（火威青）",
+        "channel": "ao",
+        "channelName": "火威青",
+        "publishedAt": "",
+        "url": "https://www.youtube.com/watch?v=T65Ct4b1Myk",
+    },
 ]
 
 
@@ -144,11 +158,21 @@ def main():
     videos = data.get("videos", [])
     status = load_json(STATUS_FILE, {}).get("videos", {})
 
-    candidates = [
+    # 特別追加2本は videos.json / transcript_status.json に関係なく最優先。
+    special = [
+        v for v in SPECIAL_VIDEOS
+        if needs_rebuild(v["videoId"])
+    ]
+
+    special_ids = {v["videoId"] for v in SPECIAL_VIDEOS}
+    normal = [
         v for v in videos
-        if status.get(v.get("videoId"), {}).get("status") == "success"
+        if v.get("videoId") not in special_ids
+        and status.get(v.get("videoId"), {}).get("status") == "success"
         and needs_rebuild(v.get("videoId"))
-    ][:MAX_VIDEOS_PER_RUN]
+    ]
+
+    candidates = (special + normal)[:MAX_VIDEOS_PER_RUN]
 
     print(f"Videos: {len(videos)}")
     print(f"Indexes to build/rebuild this run: {len(candidates)}")
@@ -171,7 +195,11 @@ def main():
         if i < len(candidates):
             time.sleep(3)
 
-    rebuild_catalog(videos)
+    catalog_videos = videos + [
+        v for v in SPECIAL_VIDEOS
+        if v["videoId"] not in {x.get("videoId") for x in videos}
+    ]
+    rebuild_catalog(catalog_videos)
     print(f"Saved {CATALOG_FILE}")
 
 
