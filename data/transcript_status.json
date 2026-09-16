@@ -1,7 +1,7 @@
 {
   "version": 1,
   "totalVideos": 1327,
-  "checkedVideos": 17,
+  "checkedVideos": 22,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -104,6 +104,36 @@
       "channel": "regloss",
       "status": "success",
       "length": 2178
+    },
+    "XsDr4BV7tJQ": {
+      "title": "【#ReGLOSSとラジオ体操】りりなでと一緒にラジオ体操やりませんか？28日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1726
+    },
+    "eOeMvjGGYoc": {
+      "title": "【 歌枠 】久しぶりの横型うた【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 23443
+    },
+    "LCBNTo27xaQ": {
+      "title": "【#ReGLOSSとラジオ体操】はじめと一緒にラジオ体操やりませんか？27日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 2086
+    },
+    "nepNeM3X-BQ": {
+      "title": "【 Fast Food Simulator 】バイトを増やした #ホーローキング ～！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 85330
+    },
+    "S9O__urxB84": {
+      "title": "【#ReGLOSSとラジオ体操】奏と一緒にラジオ体操やりませんか？26日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1933
     }
   }
 }
