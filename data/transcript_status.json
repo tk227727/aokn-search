@@ -1,7 +1,7 @@
 {
   "version": 1,
   "totalVideos": 1327,
-  "checkedVideos": 22,
+  "checkedVideos": 27,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -134,6 +134,36 @@
       "channel": "regloss",
       "status": "success",
       "length": 1933
+    },
+    "IHbC4UdyW6s": {
+      "title": "【 #ホロぷよテト大会 練習 】しゅいっちゃん先輩にテトリスを教わる？！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 26548
+    },
+    "oowtfaiSqb4": {
+      "title": "【#ReGLOSSとラジオ体操】莉々華と一緒にラジオ体操やりませんか？25日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1960
+    },
+    "az3yZaivVVw": {
+      "title": "【 Scritchy Scratchy #02 】スクラッチでお金稼ぎ！ウヒョー！！！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 55664
+    },
+    "kNtBtwRlDPM": {
+      "title": "【#ReGLOSSとラジオ体操】らでんと一緒にラジオ体操やりませんか？24日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 2378
+    },
+    "Ea6CAndmZzI": {
+      "title": "“21歳拳で組”の絆！！ご褒美目指して協力ミッションに挑戦！！！ 【#らではじクイズパッション】",
+      "channel": "regloss",
+      "status": "success",
+      "length": 16162
     }
   }
 }
