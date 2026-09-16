@@ -1,7 +1,7 @@
 {
   "version": 1,
   "totalVideos": 1327,
-  "checkedVideos": 37,
+  "checkedVideos": 42,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -224,6 +224,36 @@
       "channel": "regloss",
       "status": "success",
       "length": 578
+    },
+    "tL4AbKU4Q3o": {
+      "title": "【#ReGLOSSとラジオ体操】ギラギラ太陽に負けるな！19日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1620
+    },
+    "jE5ZRBYJbtc": {
+      "title": "【  日本事故物件監視協会3  】事故物件を見てみます、、、【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 39600
+    },
+    "Sw7dcRPvm9s": {
+      "title": "【#ReGLOSSとラジオ体操】奏と一緒にラジオ体操やりませんか？18日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1963
+    },
+    "z9hTYWxP8Wk": {
+      "title": "【 #しゅぴなで 】リリリベンジ！！！！特訓後の初代マリオ！1時間並走！！！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 21662
+    },
+    "j-7jbe3OMGg": {
+      "title": "【#ReGLOSSとラジオ体操】かなはじでラジオ体操！17日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1695
     }
   }
 }
