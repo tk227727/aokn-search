@@ -1,7 +1,7 @@
 {
   "version": 1,
   "totalVideos": 1327,
-  "checkedVideos": 32,
+  "checkedVideos": 37,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -194,6 +194,36 @@
       "channel": "regloss",
       "status": "success",
       "length": 1710
+    },
+    "_I7rCnEDJfo": {
+      "title": "【緊急会見】◯◯◯解禁!!今こそReGLOSSに物申す!? 【#ReGLOSS夏の重大告知】",
+      "channel": "regloss",
+      "status": "success",
+      "length": 29176
+    },
+    "-MTbZBYmn7o": {
+      "title": "ReGLOSS 'Worth it' (儒烏風亭らでん&轟はじめ) OFFICIAL MV",
+      "channel": "regloss",
+      "status": "success",
+      "length": 2198
+    },
+    "y1LmEJlUINM": {
+      "title": "【#ReGLOSSとラジオ体操】はじめと一緒にラジオ体操やりませんか？21日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 585
+    },
+    "In0VKq392O0": {
+      "title": "【 Fast Food Simulator 】しゅぴなででやっていくお店～！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 52139
+    },
+    "ZnlmjnaXGXo": {
+      "title": "【#ReGLOSSとラジオ体操】りりらでんとラジオ体操！20日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 578
     }
   }
 }
