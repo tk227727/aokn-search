@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 663,
+      "videoCount": 664,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "yanfuJzkc4Y",
+      "title": "【 SPAGHET 】カエラ先輩から送られた謎のゲームをやってみる【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-09-16T14:26:53Z",
+      "durationSeconds": 5057,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=yanfuJzkc4Y"
+    },
     {
       "videoId": "QOt5V8Q4OV0",
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
