@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1327,
-  "checkedVideos": 42,
+  "totalVideos": 1328,
+  "checkedVideos": 47,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -254,6 +254,36 @@
       "channel": "regloss",
       "status": "success",
       "length": 1695
+    },
+    "yanfuJzkc4Y": {
+      "title": "【 SPAGHET 】カエラ先輩から送られた謎のゲームをやってみる【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 18874
+    },
+    "oNBW796tNxM": {
+      "title": "【 初代マリオ 】我々に与えられた時間は３時間・・・【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 50471
+    },
+    "yiHLmzLj5Cc": {
+      "title": "【#ReGLOSSとラジオ体操】らではじでラジオ体操！16日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1845
+    },
+    "lPzXHx7O-5g": {
+      "title": "【#ReGLOSSとラジオ体操】祝・折り返し！今日は全員集合でラジオ体操！15日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1947
+    },
+    "5RwsmMFxGMU": {
+      "title": "【#ReGLOSSとラジオ体操】莉々華と一緒にラジオ体操！14日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 579
     }
   }
 }
