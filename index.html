@@ -61,11 +61,41 @@ function grams(s,n){const q=norm(s),out=[];for(let i=0;i<=q.length-n;i++)out.pus
 function decode(ds){let x=0;return ds.map((d,i)=>(x=i?x+d:d))}
 function fmt(sec){const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=Math.floor(sec%60);return h?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${m}:${String(s).padStart(2,"0")}`}
 function timeToSeconds(t){return t.split(":").map(Number).reduce((a,n)=>a*60+n,0)}
-function cleanText(t){return t.replace(/\s+/g," ").trim()}
+function cleanText(t){
+ let s=t.replace(/\s+/g," ").trim();
+ const parts=s.split(/(?<=[。！？!?])\s*/).filter(Boolean),out=[];
+ for(const part of parts){
+  const p=part.trim(); if(!p)continue;
+  if(out.length && norm(p)===norm(out[out.length-1]))continue;
+  out.push(p);
+ }
+ s=out.join(" ");
+ for(let size=Math.min(80,Math.floor(s.length/2));size>=3;size--){
+  let changed=true;
+  while(changed){
+   changed=false;
+   for(let i=0;i+size*2<=s.length;i++){
+    const a=s.slice(i,i+size),b=s.slice(i+size,i+size*2);
+    if(norm(a)&&norm(a)===norm(b)){
+     s=s.slice(0,i+size)+s.slice(i+size*2);changed=true;break;
+    }
+   }
+  }
+ }
+ return s.replace(/\s+/g," ").trim()
+}
 function parseTranscript(raw){
  const marker="## Transcript",body=raw.includes(marker)?raw.slice(raw.indexOf(marker)+marker.length):raw;
  const re=/\[((?:\d+:)?\d+:\d{2})\]\s*([\s\S]*?)(?=\n\s*\[((?:\d+:)?\d+:\d{2})\]|\s*$)/g;
- let m,out=[];while((m=re.exec(body))!==null){const x=cleanText(m[2]);if(x)out.push({t:timeToSeconds(m[1]),x})}return out
+ let m,out=[];while((m=re.exec(body))!==null){
+  let x=cleanText(m[2]);if(!x)continue;
+  if(out.length){
+   const prev=out[out.length-1].x;
+   if(norm(x)===norm(prev))continue;
+   if(x.startsWith(prev)&&x.length>prev.length)x=cleanText(x.slice(prev.length));
+  }
+  if(x)out.push({t:timeToSeconds(m[1]),x})
+ }return out
 }
 function makeSnippet(text,word){const n=text.normalize("NFKC").toLowerCase(),q=word.normalize("NFKC").toLowerCase(),p=n.indexOf(q);if(p<0)return text.slice(0,220);const a=Math.max(0,p-85),b=Math.min(text.length,p+word.length+135);return(a?"…":"")+text.slice(a,b)+(b<text.length?"…":"")}
 async function loadIndex(videoId){
