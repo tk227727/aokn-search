@@ -57,7 +57,7 @@ let catalog=[], currentChannel="all", indexCache=new Map(), lastMatches=[];
 const $=id=>document.getElementById(id);
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function norm(s){return String(s).normalize("NFKC").toLowerCase().replace(/\s+/g,"")}
-function grams(s){const q=norm(s),out=[];for(let i=0;i<q.length-1;i++)out.push(q.slice(i,i+2));return [...new Set(out)]}
+function grams(s,n){const q=norm(s),out=[];for(let i=0;i<=q.length-n;i++)out.push(q.slice(i,i+n));return [...new Set(out)]}
 function decode(ds){let x=0;return ds.map((d,i)=>(x=i?x+d:d))}
 function fmt(sec){const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=Math.floor(sec%60);return h?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${m}:${String(s).padStart(2,"0")}`}
 function timeToSeconds(t){return t.split(":").map(Number).reduce((a,n)=>a*60+n,0)}
@@ -74,8 +74,9 @@ async function loadIndex(videoId){
  const j=await r.json();indexCache.set(videoId,j);return j
 }
 function candidateTimes(index,word){
- const gs=grams(word);if(!gs.length)return[];
- let sets=gs.map(g=>new Set(decode(index.postings[g]||[])));if(sets.some(s=>!s.size))return[];
+ const q=norm(word),n=q.length>=3?3:2,gs=grams(word,n);if(!gs.length)return[];
+ const bucket=index.version>=2?(index.postings[String(n)]||{}):index.postings;
+ let sets=gs.map(g=>new Set(decode(bucket[g]||[])));if(sets.some(s=>!s.size))return[];
  let times=[...sets[0]];for(let i=1;i<sets.length;i++)times=times.filter(t=>sets[i].has(t));
  return times
 }
@@ -111,7 +112,11 @@ async function showDetails(v,word,showBack=false){
   const r=await fetch(API(v.videoId),{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);
   const rows=parseTranscript(await r.text()),q=norm(word);
   // n-gram is only a candidate index; verify the actual substring against the fetched transcript.
-  const hits=rows.filter(row=>norm(row.x).includes(q));
+  let hits=rows.filter(row=>norm(row.x).includes(q));
+  if(!hits.length && v.times?.length){
+   const candidateSet=new Set(v.times);
+   hits=rows.filter(row=>candidateSet.has(Math.floor(row.t)));
+  }
   $("summary").textContent=`「${word}」：${hits.length}件見つかりました`;
   const safe=word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),rx=new RegExp(safe,"gi");
   const back=showBack?'<button class="back" id="backButton">← 動画一覧に戻る</button>':"";
