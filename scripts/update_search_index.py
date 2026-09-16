@@ -14,7 +14,8 @@ MAX_VIDEOS_PER_RUN = 5
 INDEX_VERSION = 2
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt?lang=ja"
 
-# 最初の動作確認に使った2本を、未作成なら最優先で検索インデックス化する。
+# 最初の字幕取得テストに使った2本。
+# transcript_status.json の確認順を待たず、未作成なら最優先でインデックス化する。
 PRIORITY_VIDEO_IDS = [
     "4pw9GhX85WQ",  # 音乃瀬奏
     "T65Ct4b1Myk",  # 火威青
@@ -143,24 +144,11 @@ def main():
     videos = data.get("videos", [])
     status = load_json(STATUS_FILE, {}).get("videos", {})
 
-    eligible = [
+    candidates = [
         v for v in videos
         if status.get(v.get("videoId"), {}).get("status") == "success"
         and needs_rebuild(v.get("videoId"))
-    ]
-
-    # 優先動画を先頭へ。それ以外は今までどおりの順番で処理する。
-    priority_order = {
-        video_id: i for i, video_id in enumerate(PRIORITY_VIDEO_IDS)
-    }
-    eligible.sort(
-        key=lambda v: (
-            0 if v.get("videoId") in priority_order else 1,
-            priority_order.get(v.get("videoId"), 0),
-        )
-    )
-
-    candidates = eligible[:MAX_VIDEOS_PER_RUN]
+    ][:MAX_VIDEOS_PER_RUN]
 
     print(f"Videos: {len(videos)}")
     print(f"Indexes to build/rebuild this run: {len(candidates)}")
