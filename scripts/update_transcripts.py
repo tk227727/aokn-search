@@ -6,7 +6,6 @@ from pathlib import Path
 
 VIDEOS_FILE = Path("data/videos.json")
 OUTPUT_FILE = Path("data/transcript_status.json")
-MAX_VIDEOS_PER_RUN = 5
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt"
 
 
@@ -120,7 +119,8 @@ def main():
     ]
 
     pending = new_videos + retry_videos
-    selected = pending[:MAX_VIDEOS_PER_RUN]
+    # この実行で未処理・再試行対象を可能な限りすべて処理する。
+    selected = pending
 
     print(f"Total videos: {len(videos)}")
     print(f"Already checked: {len(statuses)}")
@@ -152,6 +152,16 @@ def main():
         }
 
         print(f"Result: {result}")
+
+        # 1本終わるたびに進捗を保存する。
+        # 実行が途中で止まっても、次回は保存済みの続きから処理できる。
+        progress = {
+            "version": 1,
+            "totalVideos": len(videos),
+            "checkedVideos": len(statuses),
+            "videos": statuses,
+        }
+        save_json(OUTPUT_FILE, progress)
 
         if index < len(selected):
             time.sleep(3)
