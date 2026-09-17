@@ -10,7 +10,6 @@ VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
-MAX_VIDEOS_PER_RUN = 5
 INDEX_VERSION = 2
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt?lang=ja"
 
@@ -172,7 +171,10 @@ def main():
         and needs_rebuild(v.get("videoId"))
     ]
 
-    candidates = (special + normal)[:MAX_VIDEOS_PER_RUN]
+    # 特別追加2本を優先し、その後に未作成の通常対象をすべて処理する。
+    # 既に作成済みのインデックスは needs_rebuild() によりスキップされるため、
+    # 途中でActionsが止まっても次回は残りから続行できる。
+    candidates = special + normal
 
     print(f"Videos: {len(videos)}")
     print(f"Indexes to build/rebuild this run: {len(candidates)}")
