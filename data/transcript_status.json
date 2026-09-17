@@ -1,7 +1,7 @@
 {
   "version": 1,
   "totalVideos": 1328,
-  "checkedVideos": 47,
+  "checkedVideos": 52,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -284,6 +284,36 @@
       "channel": "regloss",
       "status": "success",
       "length": 579
+    },
+    "jc7VNRCMAdU": {
+      "title": "【#ReGLOSSとラジオ体操】らでんと一緒にラジオ体操！13日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 2275
+    },
+    "6qwgYwiHv6w": {
+      "title": "【#ReGLOSSとラジオ体操】りりはじと一緒にラジオ体操！12日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 2089
+    },
+    "Kg5ekyw68hM": {
+      "title": "【#ReGLOSSとラジオ体操】なでらでと一緒にラジオ体操！11日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 580
+    },
+    "6Zyd62nJqQ8": {
+      "title": "【#ReGLOSSとラジオ体操】祝10日目！暑い夏🍉を乗り越えるぞ！",
+      "channel": "regloss",
+      "status": "success",
+      "length": 580
+    },
+    "6qcM1XVVzKg": {
+      "title": "【 #しゅぴなで 】リベンジ！！！！初代マリオ！1時間並走！！！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 35454
     }
   }
 }
