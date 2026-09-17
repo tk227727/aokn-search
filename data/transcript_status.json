@@ -1,7 +1,7 @@
 {
   "version": 1,
   "totalVideos": 1328,
-  "checkedVideos": 52,
+  "checkedVideos": 57,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -314,6 +314,36 @@
       "channel": "kanade",
       "status": "success",
       "length": 35454
+    },
+    "E_2Z0-JkakE": {
+      "title": "【#ReGLOSSとラジオ体操】朝から元気よくラジオ体操しよう💪9日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 2153
+    },
+    "yRP_4tvVPww": {
+      "title": "【 #しゅぴなで 】初代マリオ！1時間並走！！！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 36870
+    },
+    "7iFYOWm8N2U": {
+      "title": "ReGLOSS 'Lucky Loud' Rehearsal Video",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1986
+    },
+    "CyioAPpM_yc": {
+      "title": "【#ReGLOSSとラジオ体操】はじめと一緒にラジオ体操！8日目",
+      "channel": "regloss",
+      "status": "success",
+      "length": 1955
+    },
+    "8JNJ8GYgTQk": {
+      "title": "【 縦型歌枠 】呼吸！！！【音乃瀬奏】#hololiveDEV_IS #ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 31484
     }
   }
 }
