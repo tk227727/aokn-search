@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1328,
-  "checkedVideos": 1328,
+  "totalVideos": 1329,
+  "checkedVideos": 1329,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -7970,6 +7970,12 @@
       "channel": "regloss",
       "status": "success",
       "length": 239
+    },
+    "Xpu0oy4B4KI": {
+      "title": "【 ホラゲー 】つぐのひ -天招ねく救いの糸-を遊んでみる！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 34984
     }
   }
 }
