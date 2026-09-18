@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1329,
-  "checkedVideos": 1329,
+  "totalVideos": 1330,
+  "checkedVideos": 1330,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -7976,6 +7976,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 34984
+    },
+    "qUaYRV2kupA": {
+      "title": "【 歌枠 】奇襲！何歌おうかな～【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 50000
     }
   }
 }
