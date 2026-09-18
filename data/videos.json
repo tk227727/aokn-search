@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 665,
+      "videoCount": 666,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "qUaYRV2kupA",
+      "title": "【 歌枠 】奇襲！何歌おうかな～【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-09-18T14:12:29Z",
+      "durationSeconds": 7426,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=qUaYRV2kupA"
+    },
     {
       "videoId": "Xpu0oy4B4KI",
       "title": "【 ホラゲー 】つぐのひ -天招ねく救いの糸-を遊んでみる！【音乃瀬奏】#ReGLOSS",
