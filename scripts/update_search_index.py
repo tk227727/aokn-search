@@ -11,6 +11,7 @@ STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
 INDEX_VERSION = 2
+MAX_VIDEOS_PER_RUN = 50
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt?lang=ja"
 
 # 最初の字幕取得テストに使った2本。
@@ -224,7 +225,8 @@ def main():
         and needs_rebuild(v.get("videoId"))
     ]
 
-    candidates = special + normal
+    # 429対策: 1回50本まで。次回は未作成分から続行する。
+    candidates = (special + normal)[:MAX_VIDEOS_PER_RUN]
 
     print(f"Videos: {len(videos)}")
     print(f"Indexes to build/rebuild this run: {len(candidates)}")
@@ -245,7 +247,7 @@ def main():
         except Exception as e:
             print(f"  error: {str(e)[:300]}; will retry later")
         if i < len(candidates):
-            time.sleep(3)
+            time.sleep(8)
 
     catalog_videos = videos + [
         v for v in SPECIAL_VIDEOS
