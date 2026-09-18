@@ -10,6 +10,7 @@ VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
+ATTEMPTS_FILE = INDEX_DIR / "attempts.json"
 INDEX_VERSION = 2
 MAX_VIDEOS_PER_RUN = 50
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt?lang=ja"
@@ -210,26 +211,34 @@ def main():
     data = load_json(VIDEOS_FILE, {})
     videos = data.get("videos", [])
     status = load_json(STATUS_FILE, {}).get("videos", {})
+    attempts_data = load_json(ATTEMPTS_FILE, {"version": 1, "attempted": []})
+    attempted = set(attempts_data.get("attempted", []))
 
-    # 特別追加2本は videos.json / transcript_status.json に関係なく最優先。
-    special = [
-        v for v in SPECIAL_VIDEOS
-        if needs_rebuild(v["videoId"])
-    ]
-
+    special = [v for v in SPECIAL_VIDEOS if needs_rebuild(v["videoId"])]
     special_ids = {v["videoId"] for v in SPECIAL_VIDEOS}
-    normal = [
+
+    eligible = [
         v for v in videos
         if v.get("videoId") not in special_ids
         and status.get(v.get("videoId"), {}).get("status") == "success"
         and needs_rebuild(v.get("videoId"))
     ]
+    eligible.sort(key=lambda v: (v.get("publishedAt") or "9999", v.get("videoId") or ""))
 
-    # 429対策: 1回50本まで。次回は未作成分から続行する。
+    fresh = [v for v in eligible if v.get("videoId") not in attempted]
+    if fresh:
+        normal = fresh
+        phase = "first-pass"
+    else:
+        attempted.clear()
+        normal = eligible
+        phase = "retry-pass"
+
     candidates = (special + normal)[:MAX_VIDEOS_PER_RUN]
-
     print(f"Videos: {len(videos)}")
-    print(f"Indexes to build/rebuild this run: {len(candidates)}")
+    print(f"Eligible unindexed videos: {len(eligible)}")
+    print(f"Pass: {phase}")
+    print(f"Indexes to try this run: {len(candidates)}")
 
     for i, video in enumerate(candidates, 1):
         vid = video["videoId"]
@@ -239,13 +248,16 @@ def main():
             rows = parse_transcript(raw)
             if not rows:
                 print("  skipped: transcript could not be parsed")
-                continue
-            save_json(INDEX_DIR / f"{vid}.json", build_video_index(video, rows))
-            print(f"  indexed v{INDEX_VERSION}: {len(rows)} transcript sections")
+            else:
+                save_json(INDEX_DIR / f"{vid}.json", build_video_index(video, rows))
+                print(f"  indexed v{INDEX_VERSION}: {len(rows)} transcript sections")
         except urllib.error.HTTPError as e:
-            print(f"  HTTP {e.code}; will retry later")
+            print(f"  HTTP {e.code}; will retry after first pass")
         except Exception as e:
-            print(f"  error: {str(e)[:300]}; will retry later")
+            print(f"  error: {str(e)[:300]}; will retry after first pass")
+
+        attempted.add(vid)
+        save_json(ATTEMPTS_FILE, {"version": 1, "attempted": sorted(attempted)})
         if i < len(candidates):
             time.sleep(8)
 
@@ -255,7 +267,7 @@ def main():
     ]
     rebuild_catalog(catalog_videos)
     print(f"Saved {CATALOG_FILE}")
-
+    print(f"Saved {ATTEMPTS_FILE}")
 
 if __name__ == "__main__":
     main()
