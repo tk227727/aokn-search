@@ -10,6 +10,7 @@ VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
+MAX_VIDEOS_PER_RUN = 5
 INDEX_VERSION = 2
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt?lang=ja"
 
@@ -65,18 +66,72 @@ def time_to_seconds(value):
 
 
 def parse_transcript(raw):
+    """複数のタイムスタンプ形式に対応する字幕パーサー。"""
+    raw = raw.replace("\r\n", "\n").replace("\r", "\n")
     marker = "## Transcript"
     body = raw[raw.index(marker) + len(marker):] if marker in raw else raw
-    pattern = re.compile(
-        r"\[((?:\d+:)?\d+:\d{2})\]\s*([\s\S]*?)(?=\n\s*\[((?:\d+:)?\d+:\d{2})\]|\s*$)"
-    )
-    rows = []
-    for m in pattern.finditer(body):
-        text = re.sub(r"\s+", " ", m.group(2)).strip()
-        if text:
-            rows.append({"t": time_to_seconds(m.group(1)), "x": text})
-    return rows
 
+    def to_seconds(value):
+        value = value.strip().replace(",", ".")
+        try:
+            parts = [float(x) for x in value.split(":")]
+        except ValueError:
+            return None
+        if len(parts) == 3:
+            return int(parts[0] * 3600 + parts[1] * 60 + parts[2])
+        if len(parts) == 2:
+            return int(parts[0] * 60 + parts[1])
+        return None
+
+    rows = []
+
+    # [MM:SS] text / [HH:MM:SS] text
+    pat = re.compile(r"(?m)^\\s*\\[((?:\\d{1,2}:)?\\d{1,3}:\\d{2}(?:[.,]\\d+)?)\\]\\s*(.+)$")
+    for m in pat.finditer(body):
+        t = to_seconds(m.group(1))
+        x = re.sub(r"\\s+", " ", m.group(2)).strip()
+        if t is not None and x:
+            rows.append({"t": t, "x": x})
+
+    # VTT/SRT timestamp line followed by caption text
+    if not rows:
+        lines = body.split("\n")
+        i = 0
+        cue = re.compile(r"^\\s*((?:\\d{1,2}:)?\\d{1,2}:\\d{2}[.,]\\d{3})\\s*-->")
+        while i < len(lines):
+            m = cue.match(lines[i])
+            if not m:
+                i += 1
+                continue
+            t = to_seconds(m.group(1))
+            i += 1
+            parts = []
+            while i < len(lines) and lines[i].strip() and not cue.match(lines[i]):
+                if not lines[i].strip().isdigit():
+                    parts.append(lines[i].strip())
+                i += 1
+            x = re.sub(r"<[^>]+>", " ", " ".join(parts))
+            x = re.sub(r"\\s+", " ", x).strip()
+            if t is not None and x:
+                rows.append({"t": t, "x": x})
+
+    # MM:SS text / HH:MM:SS text
+    if not rows:
+        pat = re.compile(r"(?m)^\\s*((?:\\d{1,2}:)?\\d{1,3}:\\d{2}(?:[.,]\\d+)?)\\s+(.+)$")
+        for m in pat.finditer(body):
+            t = to_seconds(m.group(1))
+            x = re.sub(r"\\s+", " ", m.group(2)).strip()
+            if t is not None and x and "-->" not in x:
+                rows.append({"t": t, "x": x})
+
+    cleaned = []
+    seen = set()
+    for row in sorted(rows, key=lambda r: r["t"]):
+        key = (row["t"], row["x"])
+        if key not in seen:
+            seen.add(key)
+            cleaned.append(row)
+    return cleaned
 
 def normalize(text):
     return re.sub(
@@ -171,10 +226,7 @@ def main():
         and needs_rebuild(v.get("videoId"))
     ]
 
-    # 特別追加2本を優先し、その後に未作成の通常対象をすべて処理する。
-    # 既に作成済みのインデックスは needs_rebuild() によりスキップされるため、
-    # 途中でActionsが止まっても次回は残りから続行できる。
-    candidates = special + normal
+    candidates = (special + normal)[:MAX_VIDEOS_PER_RUN]
 
     print(f"Videos: {len(videos)}")
     print(f"Indexes to build/rebuild this run: {len(candidates)}")
