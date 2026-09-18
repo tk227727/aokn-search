@@ -10,7 +10,6 @@ VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
-MAX_VIDEOS_PER_RUN = 5
 INDEX_VERSION = 2
 TRANSCRIPT_URL = "https://youtube-transcript.ai/transcript/{}.txt?lang=ja"
 
@@ -66,44 +65,43 @@ def time_to_seconds(value):
 
 
 def parse_transcript(raw):
-    """複数のタイムスタンプ形式に対応する字幕パーサー。"""
     raw = raw.replace("\r\n", "\n").replace("\r", "\n")
     marker = "## Transcript"
-    body = raw[raw.index(marker) + len(marker):] if marker in raw else raw
+    body = raw[raw.index(marker)+len(marker):] if marker in raw else raw
 
-    def to_seconds(value):
-        value = value.strip().replace(",", ".")
+    def ts(v):
+        v = v.strip().replace(",", ".")
         try:
-            parts = [float(x) for x in value.split(":")]
+            p = [float(x) for x in v.split(":")]
         except ValueError:
             return None
-        if len(parts) == 3:
-            return int(parts[0] * 3600 + parts[1] * 60 + parts[2])
-        if len(parts) == 2:
-            return int(parts[0] * 60 + parts[1])
+        if len(p) == 3:
+            return int(p[0]*3600 + p[1]*60 + p[2])
+        if len(p) == 2:
+            return int(p[0]*60 + p[1])
         return None
 
     rows = []
+    lines = body.splitlines()
+    bracket = re.compile(r"^\s*\[((?:\d+:)?\d+:\d{2}(?:[.,]\d+)?)\]\s*(.*)$")
+    plain = re.compile(r"^\s*((?:\d+:)?\d+:\d{2}(?:[.,]\d+)?)\s+(.+)$")
+    cue = re.compile(r"^\s*((?:\d+:)?\d+:\d{2}[.,]\d+)\s+-->")
 
-    # [MM:SS] text / [HH:MM:SS] text
-    pat = re.compile(r"(?m)^\\s*\\[((?:\\d{1,2}:)?\\d{1,3}:\\d{2}(?:[.,]\\d+)?)\\]\\s*(.+)$")
-    for m in pat.finditer(body):
-        t = to_seconds(m.group(1))
-        x = re.sub(r"\\s+", " ", m.group(2)).strip()
-        if t is not None and x:
-            rows.append({"t": t, "x": x})
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        m = bracket.match(line)
+        if m:
+            t = ts(m.group(1))
+            x = re.sub(r"\s+", " ", m.group(2)).strip()
+            if t is not None and x:
+                rows.append({"t": t, "x": x})
+            i += 1
+            continue
 
-    # VTT/SRT timestamp line followed by caption text
-    if not rows:
-        lines = body.split("\n")
-        i = 0
-        cue = re.compile(r"^\\s*((?:\\d{1,2}:)?\\d{1,2}:\\d{2}[.,]\\d{3})\\s*-->")
-        while i < len(lines):
-            m = cue.match(lines[i])
-            if not m:
-                i += 1
-                continue
-            t = to_seconds(m.group(1))
+        m = cue.match(line)
+        if m:
+            t = ts(m.group(1))
             i += 1
             parts = []
             while i < len(lines) and lines[i].strip() and not cue.match(lines[i]):
@@ -111,18 +109,18 @@ def parse_transcript(raw):
                     parts.append(lines[i].strip())
                 i += 1
             x = re.sub(r"<[^>]+>", " ", " ".join(parts))
-            x = re.sub(r"\\s+", " ", x).strip()
+            x = re.sub(r"\s+", " ", x).strip()
             if t is not None and x:
                 rows.append({"t": t, "x": x})
+            continue
 
-    # MM:SS text / HH:MM:SS text
-    if not rows:
-        pat = re.compile(r"(?m)^\\s*((?:\\d{1,2}:)?\\d{1,3}:\\d{2}(?:[.,]\\d+)?)\\s+(.+)$")
-        for m in pat.finditer(body):
-            t = to_seconds(m.group(1))
-            x = re.sub(r"\\s+", " ", m.group(2)).strip()
-            if t is not None and x and "-->" not in x:
+        m = plain.match(line)
+        if m and "-->" not in line:
+            t = ts(m.group(1))
+            x = re.sub(r"\s+", " ", m.group(2)).strip()
+            if t is not None and x:
                 rows.append({"t": t, "x": x})
+        i += 1
 
     cleaned = []
     seen = set()
@@ -226,7 +224,7 @@ def main():
         and needs_rebuild(v.get("videoId"))
     ]
 
-    candidates = (special + normal)[:MAX_VIDEOS_PER_RUN]
+    candidates = special + normal
 
     print(f"Videos: {len(videos)}")
     print(f"Indexes to build/rebuild this run: {len(candidates)}")
