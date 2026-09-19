@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1330,
-  "checkedVideos": 1330,
+  "totalVideos": 1332,
+  "checkedVideos": 1332,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -7982,6 +7982,18 @@
       "channel": "kanade",
       "status": "success",
       "length": 50000
+    },
+    "aGCoecmKCoo": {
+      "title": "【 雑談 】このあとカバー動画が上がるんだって！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 38041
+    },
+    "o4SH9mJRIwU": {
+      "title": "「Surges」 - 音乃瀬奏（cover）",
+      "channel": "kanade",
+      "status": "success",
+      "length": 2252
     }
   }
 }
