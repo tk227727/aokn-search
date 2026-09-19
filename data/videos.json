@@ -22,11 +22,31 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 666,
+      "videoCount": 668,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "aGCoecmKCoo",
+      "title": "【 雑談 】このあとカバー動画が上がるんだって！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-09-19T09:45:28Z",
+      "durationSeconds": 3565,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=aGCoecmKCoo"
+    },
+    {
+      "videoId": "o4SH9mJRIwU",
+      "title": "「Surges」 - 音乃瀬奏（cover）",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-09-19T09:00:06Z",
+      "durationSeconds": 134,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=o4SH9mJRIwU"
+    },
     {
       "videoId": "qUaYRV2kupA",
       "title": "【 歌枠 】奇襲！何歌おうかな～【音乃瀬奏】#ReGLOSS",
