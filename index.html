@@ -8,11 +8,13 @@
 *{box-sizing:border-box}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f6f7fb;color:#222}
 header{background:linear-gradient(135deg,#65bfff,#ffe16b);padding:34px 18px 28px;text-align:center}
-h1{margin:0;font-size:27px} header p{margin:8px 0 0;font-size:14px;opacity:.72}
+h1{margin:0;font-size:27px}
+header p{margin:8px 0 0;font-size:14px;opacity:.72}
 main{max-width:760px;margin:auto;padding:18px}
 .card,.result{background:#fff;border-radius:18px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.07)}
 .status{font-size:13px;line-height:1.7;margin-bottom:13px;padding:10px 12px;background:#f5f6f8;border-radius:10px}
-.status.ok{background:#ecf9ef}.status.error{background:#fff0f0}
+.status.ok{background:#ecf9ef}
+.status.error{background:#fff0f0}
 .row{display:flex;gap:8px}
 input{flex:1;min-width:0;padding:14px;border:1px solid #ddd;border-radius:12px;font-size:16px;outline:none}
 button{border:0;border-radius:12px;padding:0 18px;font-size:15px;font-weight:700;background:#333;color:#fff}
@@ -21,10 +23,15 @@ button{border:0;border-radius:12px;padding:0 18px;font-size:15px;font-weight:700
 .filter.active{background:#333;color:#fff}
 #summary{margin:20px 2px 12px;font-size:14px;color:#666}
 .result{margin-bottom:12px}
-.channel{font-size:12px;font-weight:700;margin-bottom:6px}.ao{color:#168ad5}.kanade{color:#b18b00}.regloss{color:#777}
-.title{font-weight:700;line-height:1.5}.count{margin-top:9px;font-size:13px;color:#666}
+.channel{font-size:12px;font-weight:700;margin-bottom:6px}
+.ao{color:#168ad5}
+.kanade{color:#b18b00}
+.regloss{color:#777}
+.title{font-weight:700;line-height:1.5}
+.count{margin-top:9px;font-size:13px;color:#666}
 .open,.watch{display:block;width:100%;margin-top:13px;padding:11px;border-radius:10px;border:0;text-align:center;text-decoration:none;font-weight:700;font-size:14px}
-.open{background:#333;color:#fff}.watch{background:#ff0033;color:#fff}
+.open{background:#333;color:#fff}
+.watch{background:#ff0033;color:#fff}
 .time{font-weight:700;color:#168ad5;margin-top:9px}
 .text{margin-top:10px;line-height:1.75;font-size:14px;color:#444;word-break:break-word}
 mark{background:#fff0a8;padding:1px 2px;border-radius:3px}
@@ -33,138 +40,714 @@ mark{background:#fff0a8;padding:1px 2px;border-radius:3px}
 .back{margin-bottom:12px;padding:9px 12px;background:#eee;color:#444}
 </style>
 </head>
+
 <body>
-<header><h1>🔎 青かなシーン検索</h1><p>火威青 × 音乃瀬奏 × ReGLOSS</p></header>
+
+<header>
+<h1>🔎 青かなシーン検索</h1>
+<p>火威青 × 音乃瀬奏 × ReGLOSS</p>
+</header>
+
 <main>
+
 <div class="card">
-<div id="loadStatus" class="status">検索データを読み込んでいます…</div>
-<div class="row"><input id="search" type="search" placeholder="例：奏ちゃん、青さん、かわいい"><button id="searchButton">検索</button></div>
+
+<div id="loadStatus" class="status">
+検索データを読み込んでいます…
+</div>
+
+<div class="note" style="margin-top:0;margin-bottom:5px">
+動画タイトル（1文字から）
+</div>
+
+<div class="row">
+<input id="titleSearch" type="search" placeholder="例：マイクラ、歌、初配信">
+</div>
+
+<div class="note" style="margin-bottom:5px">
+字幕（2文字以上）
+</div>
+
+<div class="row">
+<input id="search" type="search" placeholder="例：奏ちゃん、青さん、かわいい">
+<button id="searchButton">検索</button>
+</div>
+
 <div class="filters">
 <button class="filter active" data-channel="all">すべて</button>
 <button class="filter" data-channel="ao">火威青</button>
 <button class="filter" data-channel="kanade">音乃瀬奏</button>
 <button class="filter" data-channel="regloss">ReGLOSS</button>
 </div>
-<div class="note">自動生成字幕を利用しているため、名前や固有名詞に誤変換が含まれる場合があります。検索対象は字幕インデックス作成済みの動画から順次増えます。</div>
+
+<div class="note">
+自動生成字幕を利用しているため、名前や固有名詞に誤変換が含まれる場合があります。
+検索対象は字幕インデックス作成済みの動画から順次増えます。
 </div>
+
+</div>
+
 <div id="summary">読み込み中です</div>
 <div id="results"></div>
+
 </main>
+
 <script>
+
 const CATALOG="data/search-index/catalog.json";
 const API=id=>`https://youtube-transcript.ai/transcript/${id}.txt?lang=ja`;
-let catalog=[], currentChannel="all", indexCache=new Map(), lastMatches=[];
+
+let catalog=[];
+let currentChannel="all";
+let indexCache=new Map();
+let lastMatches=[];
+
 const $=id=>document.getElementById(id);
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
-function norm(s){return String(s).normalize("NFKC").toLowerCase().replace(/\s+/g,"")}
-function grams(s,n){const q=norm(s),out=[];for(let i=0;i<=q.length-n;i++)out.push(q.slice(i,i+n));return [...new Set(out)]}
-function decode(ds){let x=0;return ds.map((d,i)=>(x=i?x+d:d))}
-function fmt(sec){const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s=Math.floor(sec%60);return h?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${m}:${String(s).padStart(2,"0")}`}
-function timeToSeconds(t){return t.split(":").map(Number).reduce((a,n)=>a*60+n,0)}
+
+function esc(s){
+ return String(s).replace(/[&<>"']/g,c=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#039;"
+ }[c]))
+}
+
+function norm(s){
+ return String(s)
+  .normalize("NFKC")
+  .toLowerCase()
+  .replace(/\s+/g,"")
+}
+
+function grams(s,n){
+ const q=norm(s),out=[];
+ for(let i=0;i<=q.length-n;i++){
+  out.push(q.slice(i,i+n))
+ }
+ return [...new Set(out)]
+}
+
+function decode(ds){
+ let x=0;
+ return ds.map((d,i)=>(x=i?x+d:d))
+}
+
+function fmt(sec){
+ const h=Math.floor(sec/3600);
+ const m=Math.floor(sec%3600/60);
+ const s=Math.floor(sec%60);
+
+ return h
+  ?`${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+  :`${m}:${String(s).padStart(2,"0")}`
+}
+
+function timeToSeconds(t){
+ return t.split(":").map(Number).reduce((a,n)=>a*60+n,0)
+}
+
 function cleanText(t){
+
  let s=t.replace(/\s+/g," ").trim();
- const parts=s.split(/(?<=[。！？!?])\s*/).filter(Boolean),out=[];
+
+ const parts=s
+  .split(/(?<=[。！？!?])\s*/)
+  .filter(Boolean);
+
+ const out=[];
+
  for(const part of parts){
-  const p=part.trim(); if(!p)continue;
-  if(out.length && norm(p)===norm(out[out.length-1]))continue;
+
+  const p=part.trim();
+
+  if(!p)continue;
+
+  if(
+   out.length &&
+   norm(p)===norm(out[out.length-1])
+  )continue;
+
   out.push(p);
  }
+
  s=out.join(" ");
- for(let size=Math.min(80,Math.floor(s.length/2));size>=3;size--){
+
+ for(
+  let size=Math.min(80,Math.floor(s.length/2));
+  size>=3;
+  size--
+ ){
+
   let changed=true;
+
   while(changed){
+
    changed=false;
+
    for(let i=0;i+size*2<=s.length;i++){
-    const a=s.slice(i,i+size),b=s.slice(i+size,i+size*2);
-    if(norm(a)&&norm(a)===norm(b)){
-     s=s.slice(0,i+size)+s.slice(i+size*2);changed=true;break;
+
+    const a=s.slice(i,i+size);
+    const b=s.slice(i+size,i+size*2);
+
+    if(
+     norm(a) &&
+     norm(a)===norm(b)
+    ){
+
+     s=
+      s.slice(0,i+size)+
+      s.slice(i+size*2);
+
+     changed=true;
+     break;
     }
    }
   }
  }
+
  return s.replace(/\s+/g," ").trim()
 }
+
 function parseTranscript(raw){
- const marker="## Transcript",body=raw.includes(marker)?raw.slice(raw.indexOf(marker)+marker.length):raw;
- const re=/\[((?:\d+:)?\d+:\d{2})\]\s*([\s\S]*?)(?=\n\s*\[((?:\d+:)?\d+:\d{2})\]|\s*$)/g;
- let m,out=[];while((m=re.exec(body))!==null){
-  let x=cleanText(m[2]);if(!x)continue;
+
+ const marker="## Transcript";
+
+ const body=
+  raw.includes(marker)
+   ?raw.slice(raw.indexOf(marker)+marker.length)
+   :raw;
+
+ const re=
+  /\[((?:\d+:)?\d+:\d{2})\]\s*([\s\S]*?)(?=\n\s*\[((?:\d+:)?\d+:\d{2})\]|\s*$)/g;
+
+ let m;
+ const out=[];
+
+ while((m=re.exec(body))!==null){
+
+  let x=cleanText(m[2]);
+
+  if(!x)continue;
+
   if(out.length){
+
    const prev=out[out.length-1].x;
+
    if(norm(x)===norm(prev))continue;
-   if(x.startsWith(prev)&&x.length>prev.length)x=cleanText(x.slice(prev.length));
+
+   if(
+    x.startsWith(prev) &&
+    x.length>prev.length
+   ){
+    x=cleanText(x.slice(prev.length));
+   }
   }
-  if(x)out.push({t:timeToSeconds(m[1]),x})
- }return out
+
+  if(x){
+   out.push({
+    t:timeToSeconds(m[1]),
+    x
+   })
+  }
+ }
+
+ return out
 }
-function makeSnippet(text,word){const n=text.normalize("NFKC").toLowerCase(),q=word.normalize("NFKC").toLowerCase(),p=n.indexOf(q);if(p<0)return text.slice(0,220);const a=Math.max(0,p-85),b=Math.min(text.length,p+word.length+135);return(a?"…":"")+text.slice(a,b)+(b<text.length?"…":"")}
+
+function makeSnippet(text,word){
+
+ const n=text.normalize("NFKC").toLowerCase();
+ const q=word.normalize("NFKC").toLowerCase();
+ const p=n.indexOf(q);
+
+ if(p<0)return text.slice(0,220);
+
+ const a=Math.max(0,p-85);
+ const b=Math.min(
+  text.length,
+  p+word.length+135
+ );
+
+ return(
+  (a?"…":"")+
+  text.slice(a,b)+
+  (b<text.length?"…":"")
+ )
+}
+
 async function loadIndex(videoId){
- if(indexCache.has(videoId))return indexCache.get(videoId);
- const r=await fetch(`data/search-index/${videoId}.json`,{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);
- const j=await r.json();indexCache.set(videoId,j);return j
+
+ if(indexCache.has(videoId)){
+  return indexCache.get(videoId)
+ }
+
+ const r=await fetch(
+  `data/search-index/${videoId}.json`,
+  {cache:"no-store"}
+ );
+
+ if(!r.ok){
+  throw new Error(`HTTP ${r.status}`)
+ }
+
+ const j=await r.json();
+
+ indexCache.set(videoId,j);
+
+ return j
 }
+
 function candidateTimes(index,word){
- const q=norm(word),n=q.length>=3?3:2,gs=grams(word,n);if(!gs.length)return[];
- const bucket=index.version>=2?(index.postings[String(n)]||{}):index.postings;
- let sets=gs.map(g=>new Set(decode(bucket[g]||[])));if(sets.some(s=>!s.size))return[];
- let times=[...sets[0]];for(let i=1;i<sets.length;i++)times=times.filter(t=>sets[i].has(t));
+
+ const q=norm(word);
+
+ const n=q.length>=3?3:2;
+
+ const gs=grams(word,n);
+
+ if(!gs.length)return[];
+
+ const bucket=
+  index.version>=2
+   ?(index.postings[String(n)]||{})
+   :index.postings;
+
+ let sets=gs.map(
+  g=>new Set(decode(bucket[g]||[]))
+ );
+
+ if(sets.some(s=>!s.size)){
+  return[]
+ }
+
+ let times=[...sets[0]];
+
+ for(let i=1;i<sets.length;i++){
+
+  times=times.filter(
+   t=>sets[i].has(t)
+  )
+ }
+
  return times
 }
+
 async function loadCatalog(){
+
  try{
-  const r=await fetch(CATALOG,{cache:"no-store"});if(!r.ok)throw new Error();
-  const j=await r.json();catalog=j.videos||[];
-  $("loadStatus").className="status ok";$("loadStatus").textContent=`✓ ${catalog.length}本が検索できます`;
-  $("summary").textContent="検索ワードを入力してください";
+
+  const r=await fetch(
+   CATALOG,
+   {cache:"no-store"}
+  );
+
+  if(!r.ok)throw new Error();
+
+  const j=await r.json();
+
+  catalog=j.videos||[];
+
+  $("loadStatus").className="status ok";
+
+  $("loadStatus").textContent=
+   `✓ ${catalog.length}本が検索できます`;
+
+  $("summary").textContent=
+   "検索ワードを入力してください";
+
  }catch(e){
-  $("loadStatus").className="status error";$("loadStatus").textContent="検索インデックスがまだありません。GitHub Actions の Update Search Index を一度実行してください。";
-  $("summary").textContent="検索データを準備中です";
+
+  $("loadStatus").className="status error";
+
+  $("loadStatus").textContent=
+   "検索インデックスがまだありません。GitHub Actions の Update Search Index を一度実行してください。";
+
+  $("summary").textContent=
+   "検索データを準備中です";
  }
 }
+
 async function search(){
- const word=$("search").value.trim();$("results").innerHTML="";
- if(!word){$("summary").textContent="検索ワードを入力してください";return}
- if(norm(word).length<2){$("summary").textContent="2文字以上で検索してください";return}
- const targets=catalog.filter(v=>currentChannel==="all"||v.channel===currentChannel);
- $("summary").textContent=`「${word}」を検索中…`;
- const found=[];
- await Promise.all(targets.map(async v=>{try{const idx=await loadIndex(v.videoId),times=candidateTimes(idx,word);if(times.length)found.push({...v,times})}catch(e){}}));
- found.sort((a,b)=>String(b.publishedAt).localeCompare(String(a.publishedAt)));lastMatches=found;
- if(!found.length){$("summary").textContent=`「${word}」：該当する動画はありません`;$("results").innerHTML='<div class="empty">該当するシーンがありません</div>';return}
- $("summary").textContent=`「${word}」：${found.length}本の動画で候補が見つかりました`;
- if(found.length===1){showDetails(found[0],word);return}
- $("results").innerHTML=found.map((v,i)=>`<div class="result"><div class="channel ${v.channel}">${esc(v.channelName)}</div><div class="title">${esc(v.title)}</div><div class="count">候補 ${v.times.length}区間</div><button class="open" data-i="${i}">この動画のシーンを見る</button></div>`).join("");
- document.querySelectorAll(".open").forEach(b=>b.onclick=()=>showDetails(found[Number(b.dataset.i)],word,true))
+
+ const titleWord=
+  $("titleSearch").value.trim();
+
+ const word=
+  $("search").value.trim();
+
+ $("results").innerHTML="";
+
+ if(!titleWord&&!word){
+
+  $("summary").textContent=
+   "動画タイトルまたは字幕の検索ワードを入力してください";
+
+  return
+ }
+
+ if(word&&norm(word).length<2){
+
+  $("summary").textContent=
+   "字幕は2文字以上で検索してください";
+
+  return
+ }
+
+ let targets=catalog.filter(
+  v=>
+   currentChannel==="all"||
+   v.channel===currentChannel
+ );
+
+ if(titleWord){
+
+  const tq=norm(titleWord);
+
+  targets=targets.filter(
+   v=>norm(v.title).includes(tq)
+  )
+ }
+
+ const label=
+  titleWord&&word
+   ?`タイトル「${titleWord}」＋字幕「${word}」`
+   :titleWord
+    ?`タイトル「${titleWord}」`
+    :`字幕「${word}」`;
+
+ $("summary").textContent=
+  `${label}を検索中…`;
+
+ let found=[];
+
+ if(!word){
+
+  found=targets.map(
+   v=>({...v,times:[]})
+  );
+
+ }else{
+
+  await Promise.all(
+   targets.map(async v=>{
+
+    try{
+
+     const idx=
+      await loadIndex(v.videoId);
+
+     const times=
+      candidateTimes(idx,word);
+
+     if(times.length){
+      found.push({...v,times})
+     }
+
+    }catch(e){}
+   })
+  )
+ }
+
+ found.sort(
+  (a,b)=>
+   String(b.publishedAt)
+    .localeCompare(String(a.publishedAt))
+ );
+
+ lastMatches=found;
+
+ if(!found.length){
+
+  $("summary").textContent=
+   `${label}：該当する動画はありません`;
+
+  $("results").innerHTML=
+   '<div class="empty">該当する動画・シーンがありません</div>';
+
+  return
+ }
+
+ $("summary").textContent=
+  `${label}：${found.length}本の動画が見つかりました`;
+
+ if(word&&found.length===1){
+
+  showDetails(
+   found[0],
+   word
+  );
+
+  return
+ }
+
+ if(!word){
+
+  $("results").innerHTML=
+   found.map(v=>`
+
+<div class="result">
+
+<div class="channel ${v.channel}">
+${esc(v.channelName)}
+</div>
+
+<div class="title">
+${esc(v.title)}
+</div>
+
+<a
+ class="watch"
+ href="https://www.youtube.com/watch?v=${v.videoId}"
+ target="_blank"
+ rel="noopener"
+>
+▶ YouTubeで見る
+</a>
+
+</div>
+
+`).join("");
+
+  return
+ }
+
+ $("results").innerHTML=
+  found.map((v,i)=>`
+
+<div class="result">
+
+<div class="channel ${v.channel}">
+${esc(v.channelName)}
+</div>
+
+<div class="title">
+${esc(v.title)}
+</div>
+
+<div class="count">
+候補 ${v.times.length}区間
+</div>
+
+<button
+ class="open"
+ data-i="${i}"
+>
+この動画のシーンを見る
+</button>
+
+</div>
+
+`).join("");
+
+ document
+  .querySelectorAll(".open")
+  .forEach(
+   b=>b.onclick=
+    ()=>showDetails(
+     found[Number(b.dataset.i)],
+     word,
+     true
+    )
+  )
 }
-async function showDetails(v,word,showBack=false){
- $("summary").textContent="字幕を読み込んで候補を確認しています…";$("results").innerHTML="";
+
+async function showDetails(
+ v,
+ word,
+ showBack=false
+){
+
+ $("summary").textContent=
+  "字幕を読み込んで候補を確認しています…";
+
+ $("results").innerHTML="";
+
  try{
-  const r=await fetch(API(v.videoId),{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);
-  const rows=parseTranscript(await r.text()),q=norm(word);
-  // n-gram is only a candidate index; verify the actual substring against the fetched transcript.
-  let hits=rows.filter(row=>norm(row.x).includes(q));
-  if(!hits.length && v.times?.length){
-   const candidateSet=new Set(v.times);
-   hits=rows.filter(row=>candidateSet.has(Math.floor(row.t)));
+
+  const r=await fetch(
+   API(v.videoId),
+   {cache:"no-store"}
+  );
+
+  if(!r.ok){
+   throw new Error(`HTTP ${r.status}`)
   }
-  $("summary").textContent=`「${word}」：${hits.length}件見つかりました`;
-  const safe=word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),rx=new RegExp(safe,"gi");
-  const back=showBack?'<button class="back" id="backButton">← 動画一覧に戻る</button>':"";
-  $("results").innerHTML=back+hits.map(h=>{
-   const text=esc(makeSnippet(h.x,word)).replace(rx,m=>`<mark>${m}</mark>`);
-   const url=`https://www.youtube.com/watch?v=${v.videoId}&t=${Math.floor(h.t)}s`;
-   return `<div class="result"><div class="channel ${v.channel}">${esc(v.channelName)}</div><div class="title">${esc(v.title)}</div><div class="time">${fmt(h.t)}</div><div class="text">${text}</div><a class="watch" href="${url}" target="_blank" rel="noopener">▶ この場面からYouTubeで見る</a></div>`
-  }).join("") || '<div class="empty">候補を確認しましたが完全一致はありませんでした</div>';
-  if(showBack)$("backButton").onclick=()=>search()
+
+  const rows=
+   parseTranscript(
+    await r.text()
+   );
+
+  const q=norm(word);
+
+  let hits=
+   rows.filter(
+    row=>norm(row.x).includes(q)
+   );
+
+  if(
+   !hits.length &&
+   v.times?.length
+  ){
+
+   const candidateSet=
+    new Set(v.times);
+
+   hits=
+    rows.filter(
+     row=>
+      candidateSet.has(
+       Math.floor(row.t)
+      )
+    );
+  }
+
+  $("summary").textContent=
+   `「${word}」：${hits.length}件見つかりました`;
+
+  const safe=
+   word.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+   );
+
+  const rx=
+   new RegExp(safe,"gi");
+
+  const back=
+   showBack
+    ?'<button class="back" id="backButton">← 動画一覧に戻る</button>'
+    :"";
+
+  $("results").innerHTML=
+   back+
+   hits.map(h=>{
+
+    const text=
+     esc(
+      makeSnippet(
+       h.x,
+       word
+      )
+     ).replace(
+      rx,
+      m=>`<mark>${m}</mark>`
+     );
+
+    const url=
+     `https://www.youtube.com/watch?v=${v.videoId}&t=${Math.floor(h.t)}s`;
+
+    return `
+
+<div class="result">
+
+<div class="channel ${v.channel}">
+${esc(v.channelName)}
+</div>
+
+<div class="title">
+${esc(v.title)}
+</div>
+
+<div class="time">
+${fmt(h.t)}
+</div>
+
+<div class="text">
+${text}
+</div>
+
+<a
+ class="watch"
+ href="${url}"
+ target="_blank"
+ rel="noopener"
+>
+▶ この場面からYouTubeで見る
+</a>
+
+</div>
+
+`
+   }).join("")
+   ||
+   '<div class="empty">候補を確認しましたが完全一致はありませんでした</div>';
+
+  if(showBack){
+
+   $("backButton").onclick=
+    ()=>search()
+  }
+
  }catch(e){
-  $("summary").textContent="この動画の字幕を読み込めませんでした";
-  $("results").innerHTML='<div class="empty">字幕取得先の一時的な制限などの可能性があります。時間をおいてもう一度お試しください。</div>'
+
+  $("summary").textContent=
+   "この動画の字幕を読み込めませんでした";
+
+  $("results").innerHTML=
+   '<div class="empty">字幕取得先の一時的な制限などの可能性があります。時間をおいてもう一度お試しください。</div>';
  }
 }
-$("searchButton").addEventListener("click",search);
-$("search").addEventListener("keydown",e=>{if(e.key==="Enter")search()});
-document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentChannel=b.dataset.channel;if($("search").value.trim())search()}));
+
+$("searchButton")
+ .addEventListener(
+  "click",
+  search
+ );
+
+$("search")
+ .addEventListener(
+  "keydown",
+  e=>{
+   if(e.key==="Enter"){
+    search()
+   }
+  }
+ );
+
+$("titleSearch")
+ .addEventListener(
+  "keydown",
+  e=>{
+   if(e.key==="Enter"){
+    search()
+   }
+  }
+ );
+
+document
+ .querySelectorAll(".filter")
+ .forEach(
+  b=>b.addEventListener(
+   "click",
+   ()=>{
+
+    document
+     .querySelectorAll(".filter")
+     .forEach(
+      x=>x.classList.remove("active")
+     );
+
+    b.classList.add("active");
+
+    currentChannel=
+     b.dataset.channel;
+
+    if(
+     $("search").value.trim()||
+     $("titleSearch").value.trim()
+    ){
+     search()
+    }
+   }
+  )
+ );
+
 loadCatalog();
+
 </script>
+
 </body>
 </html>
