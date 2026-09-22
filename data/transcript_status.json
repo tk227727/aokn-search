@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1332,
-  "checkedVideos": 1332,
+  "totalVideos": 1333,
+  "checkedVideos": 1333,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -7994,6 +7994,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 2252
+    },
+    "s5qLT2GPTU8": {
+      "title": "【 雑談 】おしゃフェスたのしかったねぇ～【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 45711
     }
   }
 }
