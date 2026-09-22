@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 668,
+      "videoCount": 669,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "s5qLT2GPTU8",
+      "title": "【 雑談 】おしゃフェスたのしかったねぇ～【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-09-22T11:22:25Z",
+      "durationSeconds": 4419,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=s5qLT2GPTU8"
+    },
     {
       "videoId": "aGCoecmKCoo",
       "title": "【 雑談 】このあとカバー動画が上がるんだって！【音乃瀬奏】#ReGLOSS",
