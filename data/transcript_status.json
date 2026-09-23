@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1333,
-  "checkedVideos": 1333,
+  "totalVideos": 1334,
+  "checkedVideos": 1334,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8000,6 +8000,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 45711
+    },
+    "UCLliJRLf7U": {
+      "title": "【 歌枠 】どうやらシルバーウィーク最後の日だって？【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 19895
     }
   }
 }
