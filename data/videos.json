@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 669,
+      "videoCount": 670,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "UCLliJRLf7U",
+      "title": "【 歌枠 】どうやらシルバーウィーク最後の日だって？【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-09-23T12:06:05Z",
+      "durationSeconds": 3687,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=UCLliJRLf7U"
+    },
     {
       "videoId": "s5qLT2GPTU8",
       "title": "【 雑談 】おしゃフェスたのしかったねぇ～【音乃瀬奏】#ReGLOSS",
