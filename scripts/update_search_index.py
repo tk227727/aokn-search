@@ -19,6 +19,9 @@ GLOBAL_SHARDS = 128
 INDEX_VERSION = 2
 MAX_VIDEOS_PER_RUN = 50
 
+# 字幕取得先への負荷を抑える
+REQUEST_INTERVAL = 20
+
 TRANSCRIPT_URL = (
     "https://youtube-transcript.ai/"
     "transcript/{}.txt?lang=ja"
@@ -32,10 +35,7 @@ SPECIAL_VIDEOS = [
         "channel": "kanade",
         "channelName": "音乃瀬奏",
         "publishedAt": "",
-        "url": (
-            "https://www.youtube.com/"
-            "watch?v=4pw9GhX85WQ"
-        ),
+        "url": "https://www.youtube.com/watch?v=4pw9GhX85WQ",
     },
     {
         "videoId": "T65Ct4b1Myk",
@@ -43,39 +43,23 @@ SPECIAL_VIDEOS = [
         "channel": "ao",
         "channelName": "火威青",
         "publishedAt": "",
-        "url": (
-            "https://www.youtube.com/"
-            "watch?v=T65Ct4b1Myk"
-        ),
+        "url": "https://www.youtube.com/watch?v=T65Ct4b1Myk",
     },
 ]
 
 
 def load_json(path, default):
-
     if not path.exists():
         return default
 
-    with path.open(
-        "r",
-        encoding="utf-8"
-    ) as f:
-
+    with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
 
 def save_json(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
 
-    path.parent.mkdir(
-        parents=True,
-        exist_ok=True
-    )
-
-    with path.open(
-        "w",
-        encoding="utf-8"
-    ) as f:
-
+    with path.open("w", encoding="utf-8") as f:
         json.dump(
             data,
             f,
@@ -85,14 +69,11 @@ def save_json(path, data):
 
 
 def fetch_transcript(video_id):
-
     req = urllib.request.Request(
         TRANSCRIPT_URL.format(video_id),
         headers={
             "User-Agent":
-            "Mozilla/5.0 "
-            "Chrome/140.0 "
-            "Safari/537.36"
+            "Mozilla/5.0 Chrome/140.0 Safari/537.36"
         },
     )
 
@@ -100,20 +81,37 @@ def fetch_transcript(video_id):
         req,
         timeout=30
     ) as response:
-
         return (
             response
             .read()
-            .decode(
-                "utf-8",
-                errors="replace"
-            )
+            .decode("utf-8", errors="replace")
             .strip()
         )
 
 
-def parse_time(value):
+def is_rate_limit_message(raw):
+    """
+    youtube-transcript.ai が字幕ではなく
+    利用制限メッセージを返したか確認する。
+    """
 
+    text = raw.casefold()
+
+    phrases = [
+        "high volume",
+        "higher rate limits",
+        "rate limit",
+        "too many requests",
+        "api at high volume",
+    ]
+
+    return any(
+        phrase in text
+        for phrase in phrases
+    )
+
+
+def parse_time(value):
     value = (
         value
         .strip()
@@ -121,19 +119,14 @@ def parse_time(value):
     )
 
     try:
-
         parts = [
             float(x)
-            for x
-            in value.split(":")
+            for x in value.split(":")
         ]
-
     except ValueError:
-
         return None
 
     if len(parts) == 3:
-
         return int(
             parts[0] * 3600
             + parts[1] * 60
@@ -141,7 +134,6 @@ def parse_time(value):
         )
 
     if len(parts) == 2:
-
         return int(
             parts[0] * 60
             + parts[1]
@@ -151,7 +143,6 @@ def parse_time(value):
 
 
 def clean_caption_text(text):
-
     text = re.sub(
         r"<[^>]+>",
         " ",
@@ -166,17 +157,14 @@ def clean_caption_text(text):
         .replace("&gt;", ">")
     )
 
-    text = re.sub(
+    return re.sub(
         r"\s+",
         " ",
         text
     ).strip()
 
-    return text
-
 
 def parse_transcript(raw):
-
     if not raw:
         return []
 
@@ -190,117 +178,70 @@ def parse_transcript(raw):
     marker = "## Transcript"
 
     if marker in raw:
-
         body = raw[
             raw.index(marker)
             + len(marker):
         ]
-
     else:
-
         body = raw
 
     lines = body.splitlines()
-
     rows = []
 
-    # [1:38] 字幕
-    # [01:38] 字幕
-    # [1:01:38] 字幕
-    # 小数付きにも対応
     bracket = re.compile(
-        r"^\s*"
-        r"\["
-        r"(\d+(?::\d+){1,2}"
-        r"(?:[.,]\d+)?)"
-        r"\]"
-        r"\s*(.*)$"
+        r"^\s*\["
+        r"(\d+(?::\d+){1,2}(?:[.,]\d+)?)"
+        r"\]\s*(.*)$"
     )
 
-    # 1:38 字幕
-    # 1:01:38 字幕
     plain = re.compile(
         r"^\s*"
-        r"(\d+(?::\d+){1,2}"
-        r"(?:[.,]\d+)?)"
+        r"(\d+(?::\d+){1,2}(?:[.,]\d+)?)"
         r"\s+(.+)$"
     )
 
-    # WebVTT / SRT
     cue = re.compile(
         r"^\s*"
-        r"(\d+(?::\d+){1,2}"
-        r"[.,]\d+)"
+        r"(\d+(?::\d+){1,2}[.,]\d+)"
         r"\s*-->\s*"
-        r"(\d+(?::\d+){1,2}"
-        r"[.,]\d+)"
+        r"(\d+(?::\d+){1,2}[.,]\d+)"
     )
 
     i = 0
 
     while i < len(lines):
-
         line = lines[i].strip()
 
         if not line:
-
             i += 1
             continue
-
-        # -------------------------
-        # [1:38] 字幕
-        # -------------------------
 
         m = bracket.match(line)
 
         if m:
-
-            t = parse_time(
-                m.group(1)
-            )
-
+            t = parse_time(m.group(1))
             text = clean_caption_text(
                 m.group(2)
             )
 
-            # 時刻だけの行だった場合、
-            # 次の行を字幕として使う
             if (
                 t is not None
                 and not text
                 and i + 1 < len(lines)
             ):
-
-                next_line = (
-                    lines[i + 1]
-                    .strip()
-                )
+                next_line = lines[i + 1].strip()
 
                 if (
                     next_line
-                    and
-                    not bracket.match(
-                        next_line
-                    )
-                    and
-                    not cue.match(
-                        next_line
-                    )
+                    and not bracket.match(next_line)
+                    and not cue.match(next_line)
                 ):
-
-                    text = (
-                        clean_caption_text(
-                            next_line
-                        )
+                    text = clean_caption_text(
+                        next_line
                     )
-
                     i += 1
 
-            if (
-                t is not None
-                and text
-            ):
-
+            if t is not None and text:
                 rows.append({
                     "t": t,
                     "x": text
@@ -309,50 +250,27 @@ def parse_transcript(raw):
             i += 1
             continue
 
-        # -------------------------
-        # WebVTT / SRT
-        # -------------------------
-
         m = cue.match(line)
 
         if m:
-
-            t = parse_time(
-                m.group(1)
-            )
-
+            t = parse_time(m.group(1))
             i += 1
-
             parts = []
 
             while i < len(lines):
-
-                next_line = (
-                    lines[i]
-                    .strip()
-                )
+                next_line = lines[i].strip()
 
                 if not next_line:
                     break
 
-                if cue.match(
-                    next_line
-                ):
+                if cue.match(next_line):
                     break
 
-                if (
-                    bracket.match(
-                        next_line
-                    )
-                ):
+                if bracket.match(next_line):
                     break
 
-                # SRTの番号行を除外
                 if not next_line.isdigit():
-
-                    parts.append(
-                        next_line
-                    )
+                    parts.append(next_line)
 
                 i += 1
 
@@ -360,11 +278,7 @@ def parse_transcript(raw):
                 " ".join(parts)
             )
 
-            if (
-                t is not None
-                and text
-            ):
-
+            if t is not None and text:
                 rows.append({
                     "t": t,
                     "x": text
@@ -372,30 +286,15 @@ def parse_transcript(raw):
 
             continue
 
-        # -------------------------
-        # 1:38 字幕
-        # -------------------------
-
         m = plain.match(line)
 
-        if (
-            m
-            and "-->" not in line
-        ):
-
-            t = parse_time(
-                m.group(1)
-            )
-
+        if m and "-->" not in line:
+            t = parse_time(m.group(1))
             text = clean_caption_text(
                 m.group(2)
             )
 
-            if (
-                t is not None
-                and text
-            ):
-
+            if t is not None and text:
                 rows.append({
                     "t": t,
                     "x": text
@@ -404,56 +303,36 @@ def parse_transcript(raw):
             i += 1
             continue
 
-        # -------------------------
-        # 同じ行に複数の
-        # [時刻] 字幕 がある場合
-        # -------------------------
-
         inline = list(
             re.finditer(
                 r"\["
-                r"(\d+(?::\d+){1,2}"
-                r"(?:[.,]\d+)?)"
-                r"\]"
-                r"\s*"
+                r"(\d+(?::\d+){1,2}(?:[.,]\d+)?)"
+                r"\]\s*"
                 r"(.*?)"
                 r"(?="
-                r"\[\d+(?::\d+){1,2}"
-                r"(?:[.,]\d+)?\]"
+                r"\[\d+(?::\d+){1,2}(?:[.,]\d+)?\]"
                 r"|$)",
                 line
             )
         )
 
         if inline:
-
             for item in inline:
-
                 t = parse_time(
                     item.group(1)
                 )
 
-                text = (
-                    clean_caption_text(
-                        item.group(2)
-                    )
+                text = clean_caption_text(
+                    item.group(2)
                 )
 
-                if (
-                    t is not None
-                    and text
-                ):
-
+                if t is not None and text:
                     rows.append({
                         "t": t,
                         "x": text
                     })
 
         i += 1
-
-    # -------------------------
-    # 重複除去
-    # -------------------------
 
     cleaned = []
     seen = set()
@@ -462,7 +341,6 @@ def parse_transcript(raw):
         rows,
         key=lambda r: r["t"]
     ):
-
         key = (
             row["t"],
             row["x"]
@@ -472,43 +350,22 @@ def parse_transcript(raw):
             continue
 
         seen.add(key)
-
-        # 同じ時刻に同じ文章が
-        # 重複している場合を除外
-        if cleaned:
-
-            previous = cleaned[-1]
-
-            if (
-                previous["t"]
-                == row["t"]
-                and
-                previous["x"]
-                == row["x"]
-            ):
-                continue
-
         cleaned.append(row)
 
     return cleaned
 
 
 def normalize(text):
-
     return re.sub(
         r"\s+",
         "",
         unicodedata
-        .normalize(
-            "NFKC",
-            text
-        )
+        .normalize("NFKC", text)
         .casefold()
     )
 
 
 def grams(text, n):
-
     s = normalize(text)
 
     if len(s) < n:
@@ -516,40 +373,26 @@ def grams(text, n):
 
     return {
         s[i:i+n]
-        for i
-        in range(
-            len(s)-n+1
-        )
+        for i in range(len(s)-n+1)
     }
 
 
-def build_video_index(
-    video,
-    rows
-):
-
+def build_video_index(video, rows):
     postings = {
         "2": {},
         "3": {}
     }
 
     for row in rows:
-
-        sec = int(
-            row["t"]
-        )
+        sec = int(row["t"])
 
         for n in (2, 3):
-
-            bucket = (
-                postings[str(n)]
-            )
+            bucket = postings[str(n)]
 
             for gram in grams(
                 row["x"],
                 n
             ):
-
                 bucket.setdefault(
                     gram,
                     []
@@ -557,162 +400,93 @@ def build_video_index(
 
     compact = {}
 
-    for n, bucket in (
-        postings.items()
-    ):
-
+    for n, bucket in postings.items():
         compact[n] = {}
 
-        for gram, times in (
-            bucket.items()
-        ):
-
-            unique = sorted(
-                set(times)
-            )
+        for gram, times in bucket.items():
+            unique = sorted(set(times))
 
             if not unique:
                 continue
 
-            deltas = [
-                unique[0]
-            ]
+            deltas = [unique[0]]
 
             deltas.extend(
-                unique[i]
-                - unique[i-1]
+                unique[i] - unique[i-1]
                 for i
-                in range(
-                    1,
-                    len(unique)
-                )
+                in range(1, len(unique))
             )
 
-            compact[n][gram] = (
-                deltas
-            )
+            compact[n][gram] = deltas
 
     return {
-        "version":
-        INDEX_VERSION,
-
-        "videoId":
-        video["videoId"],
-
-        "channel":
-        video["channel"],
-
-        "postings":
-        compact,
+        "version": INDEX_VERSION,
+        "videoId": video["videoId"],
+        "channel": video["channel"],
+        "postings": compact,
     }
 
 
 def needs_rebuild(video_id):
-
-    path = (
-        INDEX_DIR
-        / f"{video_id}.json"
-    )
+    path = INDEX_DIR / f"{video_id}.json"
 
     if not path.exists():
         return True
 
     try:
-
         return (
-            load_json(
-                path,
-                {}
-            ).get(
-                "version",
-                0
-            )
+            load_json(path, {})
+            .get("version", 0)
             < INDEX_VERSION
         )
-
     except Exception:
-
         return True
 
 
 def rebuild_catalog(videos):
-
     indexed = []
 
     for video in videos:
-
         p = (
             INDEX_DIR
             / f'{video["videoId"]}.json'
         )
 
         if p.exists():
-
             indexed.append({
                 "videoId":
-                video["videoId"],
-
+                    video["videoId"],
                 "title":
-                video.get(
-                    "title",
-                    ""
-                ),
-
+                    video.get("title", ""),
                 "channel":
-                video.get(
-                    "channel",
-                    ""
-                ),
-
+                    video.get("channel", ""),
                 "channelName":
-                video.get(
-                    "channelName",
-                    ""
-                ),
-
+                    video.get("channelName", ""),
                 "publishedAt":
-                video.get(
-                    "publishedAt",
-                    ""
-                ),
-
+                    video.get("publishedAt", ""),
                 "url":
-                video.get(
-                    "url",
-                    ""
-                ),
+                    video.get("url", ""),
             })
 
     save_json(
         CATALOG_FILE,
         {
-            "version":
-            INDEX_VERSION,
-
+            "version": INDEX_VERSION,
             "indexedVideos":
-            len(indexed),
-
-            "videos":
-            indexed,
+                len(indexed),
+            "videos": indexed,
         }
     )
 
 
 def shard_for_gram(gram):
-
     return (
-        sum(
-            ord(ch)
-            for ch in gram
-        )
+        sum(ord(ch) for ch in gram)
         % GLOBAL_SHARDS
     )
 
 
-def rebuild_global_index(
-    videos
-):
-
+def rebuild_global_index(videos):
     video_map = {
         v.get("videoId"): v
         for v in videos
@@ -721,16 +495,12 @@ def rebuild_global_index(
 
     shards = [
         {}
-        for _
-        in range(
-            GLOBAL_SHARDS
-        )
+        for _ in range(GLOBAL_SHARDS)
     ]
 
     indexed_count = 0
 
     for vid in video_map:
-
         path = (
             INDEX_DIR
             / f"{vid}.json"
@@ -740,54 +510,34 @@ def rebuild_global_index(
             continue
 
         try:
-
-            idx = load_json(
-                path,
-                {}
-            )
-
+            idx = load_json(path, {})
         except Exception:
-
             continue
 
         if (
-            idx.get(
-                "version",
-                0
-            )
+            idx.get("version", 0)
             < INDEX_VERSION
         ):
             continue
 
         indexed_count += 1
 
-        postings = (
-            idx.get(
-                "postings",
-                {}
-            )
+        postings = idx.get(
+            "postings",
+            {}
         )
 
         for n in ("2", "3"):
-
             for gram, deltas in (
                 postings
-                .get(
-                    n,
-                    {}
-                )
+                .get(n, {})
                 .items()
             ):
-
                 shard = shards[
-                    shard_for_gram(
-                        gram
-                    )
+                    shard_for_gram(gram)
                 ]
 
-                key = (
-                    f"{n}:{gram}"
-                )
+                key = f"{n}:{gram}"
 
                 shard.setdefault(
                     key,
@@ -799,31 +549,19 @@ def rebuild_global_index(
         exist_ok=True
     )
 
-    for old in (
-        GLOBAL_DIR.glob(
-            "*.json"
-        )
+    for old in GLOBAL_DIR.glob(
+        "*.json"
     ):
-
-        if (
-            old.name
-            != "manifest.json"
-        ):
-
+        if old.name != "manifest.json":
             old.unlink()
 
     nonempty = []
 
-    for i, data in (
-        enumerate(shards)
-    ):
-
+    for i, data in enumerate(shards):
         if not data:
             continue
 
-        name = (
-            f"{i:03d}.json"
-        )
+        name = f"{i:03d}.json"
 
         save_json(
             GLOBAL_DIR / name,
@@ -839,14 +577,11 @@ def rebuild_global_index(
         GLOBAL_MANIFEST,
         {
             "version": 1,
-            "shards":
-            GLOBAL_SHARDS,
-
+            "shards": GLOBAL_SHARDS,
             "indexedVideos":
-            indexed_count,
-
+                indexed_count,
             "nonemptyShards":
-            nonempty,
+                nonempty,
         }
     )
 
@@ -858,7 +593,6 @@ def rebuild_global_index(
 
 
 def main():
-
     data = load_json(
         VIDEOS_FILE,
         {}
@@ -874,20 +608,15 @@ def main():
             STATUS_FILE,
             {}
         )
-        .get(
-            "videos",
-            {}
-        )
+        .get("videos", {})
     )
 
-    attempts_data = (
-        load_json(
-            ATTEMPTS_FILE,
-            {
-                "version": 1,
-                "attempted": []
-            }
-        )
+    attempts_data = load_json(
+        ATTEMPTS_FILE,
+        {
+            "version": 1,
+            "attempted": []
+        }
     )
 
     attempted = set(
@@ -899,8 +628,7 @@ def main():
 
     special = [
         v
-        for v
-        in SPECIAL_VIDEOS
+        for v in SPECIAL_VIDEOS
         if needs_rebuild(
             v["videoId"]
         )
@@ -908,74 +636,52 @@ def main():
 
     special_ids = {
         v["videoId"]
-        for v
-        in SPECIAL_VIDEOS
+        for v in SPECIAL_VIDEOS
     }
 
     eligible = [
         v
-        for v
-        in videos
-
+        for v in videos
         if (
             v.get("videoId")
             not in special_ids
         )
-
         and (
             status
             .get(
-                v.get(
-                    "videoId"
-                ),
+                v.get("videoId"),
                 {}
             )
-            .get(
-                "status"
-            )
+            .get("status")
             == "success"
         )
-
         and needs_rebuild(
-            v.get(
-                "videoId"
-            )
+            v.get("videoId")
         )
     ]
 
     eligible.sort(
         key=lambda v: (
-            v.get(
-                "publishedAt"
-            )
+            v.get("publishedAt")
             or "9999",
-
-            v.get(
-                "videoId"
-            )
+            v.get("videoId")
             or ""
         )
     )
 
     fresh = [
         v
-        for v
-        in eligible
+        for v in eligible
         if (
-            v.get(
-                "videoId"
-            )
+            v.get("videoId")
             not in attempted
         )
     ]
 
     if fresh:
-
         normal = fresh
         phase = "first-pass"
-
     else:
-
         attempted.clear()
         normal = eligible
         phase = "retry-pass"
@@ -1006,7 +712,6 @@ def main():
         candidates,
         1
     ):
-
         vid = video["videoId"]
 
         print(
@@ -1015,108 +720,116 @@ def main():
             f"{video.get('title')}"
         )
 
+        mark_attempted = True
+
         try:
+            raw = fetch_transcript(vid)
 
-            raw = fetch_transcript(
-                vid
-            )
+            # -------------------------
+            # API利用制限を検出
+            # -------------------------
 
-            rows = parse_transcript(
-                raw
-            )
-
-            if not rows:
-
-                # 次回の原因確認を簡単にするため、
-                # 返ってきたデータの概要もログに出す
-                preview = (
-                    raw[:180]
-                    .replace(
-                        "\n",
-                        " "
-                    )
-                )
-
+            if is_rate_limit_message(raw):
                 print(
-                    "  skipped: "
-                    "transcript could "
-                    "not be parsed"
+                    "  rate limited by "
+                    "transcript provider; "
+                    "will retry later"
                 )
 
-                print(
-                    "  transcript chars: "
-                    f"{len(raw)}"
-                )
-
-                print(
-                    "  transcript preview: "
-                    f"{preview}"
-                )
+                # この動画は「処理済み」にしない
+                # 次回もう一度試す
+                mark_attempted = False
 
             else:
+                rows = parse_transcript(raw)
 
-                save_json(
-                    INDEX_DIR
-                    / f"{vid}.json",
-
-                    build_video_index(
-                        video,
-                        rows
+                if not rows:
+                    preview = (
+                        raw[:180]
+                        .replace("\n", " ")
                     )
-                )
 
-                print(
-                    f"  indexed "
-                    f"v{INDEX_VERSION}: "
-                    f"{len(rows)} "
-                    "transcript sections"
-                )
+                    print(
+                        "  skipped: "
+                        "transcript could "
+                        "not be parsed"
+                    )
+
+                    print(
+                        "  transcript chars: "
+                        f"{len(raw)}"
+                    )
+
+                    print(
+                        "  transcript preview: "
+                        f"{preview}"
+                    )
+
+                else:
+                    save_json(
+                        INDEX_DIR
+                        / f"{vid}.json",
+                        build_video_index(
+                            video,
+                            rows
+                        )
+                    )
+
+                    print(
+                        f"  indexed "
+                        f"v{INDEX_VERSION}: "
+                        f"{len(rows)} "
+                        "transcript sections"
+                    )
 
         except urllib.error.HTTPError as e:
-
             print(
                 f"  HTTP {e.code}; "
-                "will retry after "
-                "first pass"
+                "will retry later"
             )
 
-        except Exception as e:
+            # HTTPエラーも後で再試行
+            mark_attempted = False
 
+        except Exception as e:
             print(
                 "  error: "
                 f"{str(e)[:300]}; "
-                "will retry after "
-                "first pass"
+                "will retry later"
             )
 
-        attempted.add(vid)
+            mark_attempted = False
+
+        if mark_attempted:
+            attempted.add(vid)
 
         save_json(
             ATTEMPTS_FILE,
             {
                 "version": 1,
                 "attempted":
-                sorted(attempted)
+                    sorted(attempted)
             }
         )
 
         if i < len(candidates):
-
-            time.sleep(8)
+            time.sleep(
+                REQUEST_INTERVAL
+            )
 
     catalog_videos = (
         videos
         +
         [
             v
-            for v
-            in SPECIAL_VIDEOS
-
-            if v["videoId"]
-            not in {
-                x.get("videoId")
-                for x in videos
-            }
+            for v in SPECIAL_VIDEOS
+            if (
+                v["videoId"]
+                not in {
+                    x.get("videoId")
+                    for x in videos
+                }
+            )
         ]
     )
 
