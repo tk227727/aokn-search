@@ -11,6 +11,7 @@ STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
 ATTEMPTS_FILE = INDEX_DIR / "attempts.json"
+
 GLOBAL_DIR = INDEX_DIR / "global"
 GLOBAL_MANIFEST = GLOBAL_DIR / "manifest.json"
 GLOBAL_SHARDS = 128
@@ -23,9 +24,7 @@ TRANSCRIPT_URL = (
     "transcript/{}.txt?lang=ja"
 )
 
-# 最初の字幕取得テストに使った2本。
-# videos.json に存在しなくても、
-# 特別追加枠として検索対象にする。
+
 SPECIAL_VIDEOS = [
     {
         "videoId": "4pw9GhX85WQ",
@@ -53,213 +52,329 @@ SPECIAL_VIDEOS = [
 
 
 def load_json(path, default):
+
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as f:
+    with path.open(
+        "r",
+        encoding="utf-8"
+    ) as f:
+
         return json.load(f)
 
 
 def save_json(path, data):
+
     path.parent.mkdir(
         parents=True,
-        exist_ok=True,
+        exist_ok=True
     )
 
     with path.open(
         "w",
-        encoding="utf-8",
+        encoding="utf-8"
     ) as f:
+
         json.dump(
             data,
             f,
             ensure_ascii=False,
-            separators=(",", ":"),
+            separators=(",", ":")
         )
 
 
 def fetch_transcript(video_id):
+
     req = urllib.request.Request(
         TRANSCRIPT_URL.format(video_id),
         headers={
-            "User-Agent": (
-                "Mozilla/5.0 "
-                "Chrome/140.0 Safari/537.36"
-            )
+            "User-Agent":
+            "Mozilla/5.0 "
+            "Chrome/140.0 "
+            "Safari/537.36"
         },
     )
 
     with urllib.request.urlopen(
         req,
-        timeout=30,
+        timeout=30
     ) as response:
+
         return (
             response
             .read()
             .decode(
                 "utf-8",
-                errors="replace",
+                errors="replace"
             )
             .strip()
         )
 
 
-def time_to_seconds(value):
-    total = 0
+def parse_time(value):
 
-    for n in map(
-        int,
-        value.split(":"),
-    ):
-        total = total * 60 + n
+    value = (
+        value
+        .strip()
+        .replace(",", ".")
+    )
 
-    return total
+    try:
+
+        parts = [
+            float(x)
+            for x
+            in value.split(":")
+        ]
+
+    except ValueError:
+
+        return None
+
+    if len(parts) == 3:
+
+        return int(
+            parts[0] * 3600
+            + parts[1] * 60
+            + parts[2]
+        )
+
+    if len(parts) == 2:
+
+        return int(
+            parts[0] * 60
+            + parts[1]
+        )
+
+    return None
+
+
+def clean_caption_text(text):
+
+    text = re.sub(
+        r"<[^>]+>",
+        " ",
+        text
+    )
+
+    text = (
+        text
+        .replace("&nbsp;", " ")
+        .replace("&amp;", "&")
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+    )
+
+    text = re.sub(
+        r"\s+",
+        " ",
+        text
+    ).strip()
+
+    return text
 
 
 def parse_transcript(raw):
+
+    if not raw:
+        return []
+
     raw = (
         raw
         .replace("\r\n", "\n")
         .replace("\r", "\n")
+        .replace("\ufeff", "")
     )
 
     marker = "## Transcript"
 
-    body = (
-        raw[
+    if marker in raw:
+
+        body = raw[
             raw.index(marker)
             + len(marker):
         ]
-        if marker in raw
-        else raw
-    )
 
-    def ts(v):
-        v = (
-            v
-            .strip()
-            .replace(",", ".")
-        )
+    else:
 
-        try:
-            p = [
-                float(x)
-                for x in v.split(":")
-            ]
-        except ValueError:
-            return None
+        body = raw
 
-        if len(p) == 3:
-            return int(
-                p[0] * 3600
-                + p[1] * 60
-                + p[2]
-            )
-
-        if len(p) == 2:
-            return int(
-                p[0] * 60
-                + p[1]
-            )
-
-        return None
-
-    rows = []
     lines = body.splitlines()
 
+    rows = []
+
+    # [1:38] 字幕
+    # [01:38] 字幕
+    # [1:01:38] 字幕
+    # 小数付きにも対応
     bracket = re.compile(
         r"^\s*"
         r"\["
-        r"((?:\d+:)?\d+:\d{2}"
+        r"(\d+(?::\d+){1,2}"
         r"(?:[.,]\d+)?)"
         r"\]"
         r"\s*(.*)$"
     )
 
+    # 1:38 字幕
+    # 1:01:38 字幕
     plain = re.compile(
         r"^\s*"
-        r"((?:\d+:)?\d+:\d{2}"
+        r"(\d+(?::\d+){1,2}"
         r"(?:[.,]\d+)?)"
         r"\s+(.+)$"
     )
 
+    # WebVTT / SRT
     cue = re.compile(
         r"^\s*"
-        r"((?:\d+:)?\d+:\d{2}"
+        r"(\d+(?::\d+){1,2}"
         r"[.,]\d+)"
-        r"\s+-->"
+        r"\s*-->\s*"
+        r"(\d+(?::\d+){1,2}"
+        r"[.,]\d+)"
     )
 
     i = 0
 
     while i < len(lines):
-        line = lines[i]
+
+        line = lines[i].strip()
+
+        if not line:
+
+            i += 1
+            continue
+
+        # -------------------------
+        # [1:38] 字幕
+        # -------------------------
 
         m = bracket.match(line)
 
         if m:
-            t = ts(m.group(1))
 
-            x = re.sub(
-                r"\s+",
-                " ",
-                m.group(2),
-            ).strip()
+            t = parse_time(
+                m.group(1)
+            )
+
+            text = clean_caption_text(
+                m.group(2)
+            )
+
+            # 時刻だけの行だった場合、
+            # 次の行を字幕として使う
+            if (
+                t is not None
+                and not text
+                and i + 1 < len(lines)
+            ):
+
+                next_line = (
+                    lines[i + 1]
+                    .strip()
+                )
+
+                if (
+                    next_line
+                    and
+                    not bracket.match(
+                        next_line
+                    )
+                    and
+                    not cue.match(
+                        next_line
+                    )
+                ):
+
+                    text = (
+                        clean_caption_text(
+                            next_line
+                        )
+                    )
+
+                    i += 1
 
             if (
                 t is not None
-                and x
+                and text
             ):
+
                 rows.append({
                     "t": t,
-                    "x": x,
+                    "x": text
                 })
 
             i += 1
             continue
+
+        # -------------------------
+        # WebVTT / SRT
+        # -------------------------
 
         m = cue.match(line)
 
         if m:
-            t = ts(m.group(1))
+
+            t = parse_time(
+                m.group(1)
+            )
+
             i += 1
 
             parts = []
 
-            while (
-                i < len(lines)
-                and lines[i].strip()
-                and not cue.match(lines[i])
-            ):
-                if not lines[i].strip().isdigit():
+            while i < len(lines):
+
+                next_line = (
+                    lines[i]
+                    .strip()
+                )
+
+                if not next_line:
+                    break
+
+                if cue.match(
+                    next_line
+                ):
+                    break
+
+                if (
+                    bracket.match(
+                        next_line
+                    )
+                ):
+                    break
+
+                # SRTの番号行を除外
+                if not next_line.isdigit():
+
                     parts.append(
-                        lines[i].strip()
+                        next_line
                     )
 
                 i += 1
 
-            x = re.sub(
-                r"<[^>]+>",
-                " ",
-                " ".join(parts),
+            text = clean_caption_text(
+                " ".join(parts)
             )
-
-            x = re.sub(
-                r"\s+",
-                " ",
-                x,
-            ).strip()
 
             if (
                 t is not None
-                and x
+                and text
             ):
+
                 rows.append({
                     "t": t,
-                    "x": x,
+                    "x": text
                 })
 
             continue
+
+        # -------------------------
+        # 1:38 字幕
+        # -------------------------
 
         m = plain.match(line)
 
@@ -267,129 +382,233 @@ def parse_transcript(raw):
             m
             and "-->" not in line
         ):
-            t = ts(m.group(1))
 
-            x = re.sub(
-                r"\s+",
-                " ",
-                m.group(2),
-            ).strip()
+            t = parse_time(
+                m.group(1)
+            )
+
+            text = clean_caption_text(
+                m.group(2)
+            )
 
             if (
                 t is not None
-                and x
+                and text
             ):
+
                 rows.append({
                     "t": t,
-                    "x": x,
+                    "x": text
                 })
 
+            i += 1
+            continue
+
+        # -------------------------
+        # 同じ行に複数の
+        # [時刻] 字幕 がある場合
+        # -------------------------
+
+        inline = list(
+            re.finditer(
+                r"\["
+                r"(\d+(?::\d+){1,2}"
+                r"(?:[.,]\d+)?)"
+                r"\]"
+                r"\s*"
+                r"(.*?)"
+                r"(?="
+                r"\[\d+(?::\d+){1,2}"
+                r"(?:[.,]\d+)?\]"
+                r"|$)",
+                line
+            )
+        )
+
+        if inline:
+
+            for item in inline:
+
+                t = parse_time(
+                    item.group(1)
+                )
+
+                text = (
+                    clean_caption_text(
+                        item.group(2)
+                    )
+                )
+
+                if (
+                    t is not None
+                    and text
+                ):
+
+                    rows.append({
+                        "t": t,
+                        "x": text
+                    })
+
         i += 1
+
+    # -------------------------
+    # 重複除去
+    # -------------------------
 
     cleaned = []
     seen = set()
 
     for row in sorted(
         rows,
-        key=lambda r: r["t"],
+        key=lambda r: r["t"]
     ):
+
         key = (
             row["t"],
-            row["x"],
+            row["x"]
         )
 
-        if key not in seen:
-            seen.add(key)
-            cleaned.append(row)
+        if key in seen:
+            continue
+
+        seen.add(key)
+
+        # 同じ時刻に同じ文章が
+        # 重複している場合を除外
+        if cleaned:
+
+            previous = cleaned[-1]
+
+            if (
+                previous["t"]
+                == row["t"]
+                and
+                previous["x"]
+                == row["x"]
+            ):
+                continue
+
+        cleaned.append(row)
 
     return cleaned
 
 
 def normalize(text):
+
     return re.sub(
         r"\s+",
         "",
         unicodedata
         .normalize(
             "NFKC",
-            text,
+            text
         )
-        .casefold(),
+        .casefold()
     )
 
 
 def grams(text, n):
+
     s = normalize(text)
 
     if len(s) < n:
         return set()
 
     return {
-        s[i:i + n]
-        for i in range(
-            len(s) - n + 1
+        s[i:i+n]
+        for i
+        in range(
+            len(s)-n+1
         )
     }
 
 
 def build_video_index(
     video,
-    rows,
+    rows
 ):
-    # v2では2文字・3文字の両方を保存する。
+
     postings = {
         "2": {},
-        "3": {},
+        "3": {}
     }
 
     for row in rows:
-        sec = int(row["t"])
+
+        sec = int(
+            row["t"]
+        )
 
         for n in (2, 3):
-            bucket = postings[str(n)]
+
+            bucket = (
+                postings[str(n)]
+            )
 
             for gram in grams(
                 row["x"],
-                n,
+                n
             ):
+
                 bucket.setdefault(
                     gram,
-                    [],
+                    []
                 ).append(sec)
 
     compact = {}
 
-    for n, bucket in postings.items():
+    for n, bucket in (
+        postings.items()
+    ):
+
         compact[n] = {}
 
-        for gram, times in bucket.items():
-            unique = sorted(set(times))
+        for gram, times in (
+            bucket.items()
+        ):
+
+            unique = sorted(
+                set(times)
+            )
 
             if not unique:
                 continue
 
-            deltas = [unique[0]]
+            deltas = [
+                unique[0]
+            ]
 
             deltas.extend(
                 unique[i]
-                - unique[i - 1]
-                for i in range(
+                - unique[i-1]
+                for i
+                in range(
                     1,
-                    len(unique),
+                    len(unique)
                 )
             )
 
-            compact[n][gram] = deltas
+            compact[n][gram] = (
+                deltas
+            )
 
     return {
-        "version": INDEX_VERSION,
-        "videoId": video["videoId"],
-        "channel": video["channel"],
-        "postings": compact,
+        "version":
+        INDEX_VERSION,
+
+        "videoId":
+        video["videoId"],
+
+        "channel":
+        video["channel"],
+
+        "postings":
+        compact,
     }
 
 
 def needs_rebuild(video_id):
+
     path = (
         INDEX_DIR
         / f"{video_id}.json"
@@ -399,84 +618,88 @@ def needs_rebuild(video_id):
         return True
 
     try:
+
         return (
             load_json(
                 path,
-                {},
+                {}
             ).get(
                 "version",
-                0,
+                0
             )
             < INDEX_VERSION
         )
 
     except Exception:
+
         return True
 
 
 def rebuild_catalog(videos):
+
     indexed = []
 
     for video in videos:
+
         p = (
             INDEX_DIR
             / f'{video["videoId"]}.json'
         )
 
         if p.exists():
+
             indexed.append({
                 "videoId":
-                    video["videoId"],
+                video["videoId"],
 
                 "title":
-                    video.get(
-                        "title",
-                        "",
-                    ),
+                video.get(
+                    "title",
+                    ""
+                ),
 
                 "channel":
-                    video.get(
-                        "channel",
-                        "",
-                    ),
+                video.get(
+                    "channel",
+                    ""
+                ),
 
                 "channelName":
-                    video.get(
-                        "channelName",
-                        "",
-                    ),
+                video.get(
+                    "channelName",
+                    ""
+                ),
 
                 "publishedAt":
-                    video.get(
-                        "publishedAt",
-                        "",
-                    ),
+                video.get(
+                    "publishedAt",
+                    ""
+                ),
 
                 "url":
-                    video.get(
-                        "url",
-                        "",
-                    ),
+                video.get(
+                    "url",
+                    ""
+                ),
             })
 
     save_json(
         CATALOG_FILE,
         {
             "version":
-                INDEX_VERSION,
+            INDEX_VERSION,
 
             "indexedVideos":
-                len(indexed),
+            len(indexed),
 
             "videos":
-                indexed,
-        },
+            indexed,
+        }
     )
 
 
 def shard_for_gram(gram):
-    # JavaScript側でも
-    # 同じ計算を使用する。
+
     return (
         sum(
             ord(ch)
@@ -486,16 +709,9 @@ def shard_for_gram(gram):
     )
 
 
-def rebuild_global_index(videos):
-    """
-    既存の動画別インデックスを
-    128個の検索用データにまとめる。
-
-    サイト側では検索語に必要な
-    データだけ取得するため、
-    全動画のJSONを1本ずつ
-    読み込む必要がなくなる。
-    """
+def rebuild_global_index(
+    videos
+):
 
     video_map = {
         v.get("videoId"): v
@@ -505,7 +721,8 @@ def rebuild_global_index(videos):
 
     shards = [
         {}
-        for _ in range(
+        for _
+        in range(
             GLOBAL_SHARDS
         )
     ]
@@ -513,6 +730,7 @@ def rebuild_global_index(videos):
     indexed_count = 0
 
     for vid in video_map:
+
         path = (
             INDEX_DIR
             / f"{vid}.json"
@@ -522,17 +740,20 @@ def rebuild_global_index(videos):
             continue
 
         try:
+
             idx = load_json(
                 path,
-                {},
+                {}
             )
+
         except Exception:
+
             continue
 
         if (
             idx.get(
                 "version",
-                0,
+                0
             )
             < INDEX_VERSION
         ):
@@ -540,19 +761,23 @@ def rebuild_global_index(videos):
 
         indexed_count += 1
 
-        postings = idx.get(
-            "postings",
-            {},
+        postings = (
+            idx.get(
+                "postings",
+                {}
+            )
         )
 
         for n in ("2", "3"):
-            for (
-                gram,
-                deltas,
-            ) in postings.get(
-                n,
-                {},
-            ).items():
+
+            for gram, deltas in (
+                postings
+                .get(
+                    n,
+                    {}
+                )
+                .items()
+            ):
 
                 shard = shards[
                     shard_for_gram(
@@ -566,40 +791,46 @@ def rebuild_global_index(videos):
 
                 shard.setdefault(
                     key,
-                    {},
+                    {}
                 )[vid] = deltas
 
     GLOBAL_DIR.mkdir(
         parents=True,
-        exist_ok=True,
+        exist_ok=True
     )
 
-    # 古い検索用シャードを削除。
-    for old in GLOBAL_DIR.glob(
-        "*.json"
+    for old in (
+        GLOBAL_DIR.glob(
+            "*.json"
+        )
     ):
+
         if (
             old.name
             != "manifest.json"
         ):
+
             old.unlink()
 
     nonempty = []
 
-    for i, data in enumerate(
-        shards
+    for i, data in (
+        enumerate(shards)
     ):
+
         if not data:
             continue
 
-        name = f"{i:03d}.json"
+        name = (
+            f"{i:03d}.json"
+        )
 
         save_json(
             GLOBAL_DIR / name,
             {
                 "version": 1,
                 "postings": data,
-            },
+            }
         )
 
         nonempty.append(i)
@@ -608,16 +839,15 @@ def rebuild_global_index(videos):
         GLOBAL_MANIFEST,
         {
             "version": 1,
-
             "shards":
-                GLOBAL_SHARDS,
+            GLOBAL_SHARDS,
 
             "indexedVideos":
-                indexed_count,
+            indexed_count,
 
             "nonemptyShards":
-                nonempty,
-        },
+            nonempty,
+        }
     )
 
     print(
@@ -628,42 +858,49 @@ def rebuild_global_index(videos):
 
 
 def main():
+
     data = load_json(
         VIDEOS_FILE,
-        {},
+        {}
     )
 
     videos = data.get(
         "videos",
-        [],
+        []
     )
 
-    status = load_json(
-        STATUS_FILE,
-        {},
-    ).get(
-        "videos",
-        {},
+    status = (
+        load_json(
+            STATUS_FILE,
+            {}
+        )
+        .get(
+            "videos",
+            {}
+        )
     )
 
-    attempts_data = load_json(
-        ATTEMPTS_FILE,
-        {
-            "version": 1,
-            "attempted": [],
-        },
+    attempts_data = (
+        load_json(
+            ATTEMPTS_FILE,
+            {
+                "version": 1,
+                "attempted": []
+            }
+        )
     )
 
     attempted = set(
         attempts_data.get(
             "attempted",
-            [],
+            []
         )
     )
 
     special = [
         v
-        for v in SPECIAL_VIDEOS
+        for v
+        in SPECIAL_VIDEOS
         if needs_rebuild(
             v["videoId"]
         )
@@ -671,51 +908,74 @@ def main():
 
     special_ids = {
         v["videoId"]
-        for v in SPECIAL_VIDEOS
+        for v
+        in SPECIAL_VIDEOS
     }
 
     eligible = [
         v
-        for v in videos
+        for v
+        in videos
+
         if (
             v.get("videoId")
             not in special_ids
         )
+
         and (
-            status.get(
-                v.get("videoId"),
-                {},
-            ).get("status")
+            status
+            .get(
+                v.get(
+                    "videoId"
+                ),
+                {}
+            )
+            .get(
+                "status"
+            )
             == "success"
         )
+
         and needs_rebuild(
-            v.get("videoId")
+            v.get(
+                "videoId"
+            )
         )
     ]
 
     eligible.sort(
         key=lambda v: (
-            v.get("publishedAt")
+            v.get(
+                "publishedAt"
+            )
             or "9999",
-            v.get("videoId")
-            or "",
+
+            v.get(
+                "videoId"
+            )
+            or ""
         )
     )
 
     fresh = [
         v
-        for v in eligible
+        for v
+        in eligible
         if (
-            v.get("videoId")
+            v.get(
+                "videoId"
+            )
             not in attempted
         )
     ]
 
     if fresh:
+
         normal = fresh
         phase = "first-pass"
 
     else:
+
         attempted.clear()
         normal = eligible
         phase = "retry-pass"
@@ -744,17 +1004,19 @@ def main():
 
     for i, video in enumerate(
         candidates,
-        1,
+        1
     ):
+
         vid = video["videoId"]
 
         print(
             f"[{i}/{len(candidates)}] "
-            f"{video.get('channelName')} "
-            f"/ {video.get('title')}"
+            f"{video.get('channelName')} / "
+            f"{video.get('title')}"
         )
 
         try:
+
             raw = fetch_transcript(
                 vid
             )
@@ -764,21 +1026,43 @@ def main():
             )
 
             if not rows:
+
+                # 次回の原因確認を簡単にするため、
+                # 返ってきたデータの概要もログに出す
+                preview = (
+                    raw[:180]
+                    .replace(
+                        "\n",
+                        " "
+                    )
+                )
+
                 print(
                     "  skipped: "
                     "transcript could "
                     "not be parsed"
                 )
 
+                print(
+                    "  transcript chars: "
+                    f"{len(raw)}"
+                )
+
+                print(
+                    "  transcript preview: "
+                    f"{preview}"
+                )
+
             else:
+
                 save_json(
                     INDEX_DIR
                     / f"{vid}.json",
 
                     build_video_index(
                         video,
-                        rows,
-                    ),
+                        rows
+                    )
                 )
 
                 print(
@@ -789,6 +1073,7 @@ def main():
                 )
 
         except urllib.error.HTTPError as e:
+
             print(
                 f"  HTTP {e.code}; "
                 "will retry after "
@@ -796,6 +1081,7 @@ def main():
             )
 
         except Exception as e:
+
             print(
                 "  error: "
                 f"{str(e)[:300]}; "
@@ -810,18 +1096,22 @@ def main():
             {
                 "version": 1,
                 "attempted":
-                    sorted(attempted),
-            },
+                sorted(attempted)
+            }
         )
 
         if i < len(candidates):
+
             time.sleep(8)
 
     catalog_videos = (
         videos
-        + [
+        +
+        [
             v
-            for v in SPECIAL_VIDEOS
+            for v
+            in SPECIAL_VIDEOS
+
             if v["videoId"]
             not in {
                 x.get("videoId")
