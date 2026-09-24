@@ -10,7 +10,7 @@ VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
-ATTEMPTS_FILE = INDEX_DIR / "attempts.json"
+ATTEMPTS_FILE = INDEX_DIR / "attempts.json")
 
 GLOBAL_DIR = INDEX_DIR / "global"
 GLOBAL_MANIFEST = GLOBAL_DIR / "manifest.json"
@@ -19,7 +19,7 @@ GLOBAL_SHARDS = 128
 INDEX_VERSION = 2
 MAX_VIDEOS_PER_RUN = 50
 
-# 字幕取得先への負荷を抑える
+# 通常時の字幕取得間隔
 REQUEST_INTERVAL = 20
 
 TRANSCRIPT_URL = (
@@ -57,9 +57,15 @@ def load_json(path, default):
 
 
 def save_json(path, data):
-    path.parent.mkdir(parents=True, exist_ok=True)
+    path.parent.mkdir(
+        parents=True,
+        exist_ok=True
+    )
 
-    with path.open("w", encoding="utf-8") as f:
+    with path.open(
+        "w",
+        encoding="utf-8"
+    ) as f:
         json.dump(
             data,
             f,
@@ -84,17 +90,15 @@ def fetch_transcript(video_id):
         return (
             response
             .read()
-            .decode("utf-8", errors="replace")
+            .decode(
+                "utf-8",
+                errors="replace"
+            )
             .strip()
         )
 
 
 def is_rate_limit_message(raw):
-    """
-    youtube-transcript.ai が字幕ではなく
-    利用制限メッセージを返したか確認する。
-    """
-
     text = raw.casefold()
 
     phrases = [
@@ -229,7 +233,10 @@ def parse_transcript(raw):
                 and not text
                 and i + 1 < len(lines)
             ):
-                next_line = lines[i + 1].strip()
+                next_line = (
+                    lines[i + 1]
+                    .strip()
+                )
 
                 if (
                     next_line
@@ -258,7 +265,10 @@ def parse_transcript(raw):
             parts = []
 
             while i < len(lines):
-                next_line = lines[i].strip()
+                next_line = (
+                    lines[i]
+                    .strip()
+                )
 
                 if not next_line:
                     break
@@ -270,7 +280,9 @@ def parse_transcript(raw):
                     break
 
                 if not next_line.isdigit():
-                    parts.append(next_line)
+                    parts.append(
+                        next_line
+                    )
 
                 i += 1
 
@@ -288,8 +300,14 @@ def parse_transcript(raw):
 
         m = plain.match(line)
 
-        if m and "-->" not in line:
-            t = parse_time(m.group(1))
+        if (
+            m
+            and "-->" not in line
+        ):
+            t = parse_time(
+                m.group(1)
+            )
+
             text = clean_caption_text(
                 m.group(2)
             )
@@ -326,7 +344,10 @@ def parse_transcript(raw):
                     item.group(2)
                 )
 
-                if t is not None and text:
+                if (
+                    t is not None
+                    and text
+                ):
                     rows.append({
                         "t": t,
                         "x": text
@@ -360,7 +381,10 @@ def normalize(text):
         r"\s+",
         "",
         unicodedata
-        .normalize("NFKC", text)
+        .normalize(
+            "NFKC",
+            text
+        )
         .casefold()
     )
 
@@ -373,7 +397,10 @@ def grams(text, n):
 
     return {
         s[i:i+n]
-        for i in range(len(s)-n+1)
+        for i
+        in range(
+            len(s)-n+1
+        )
     }
 
 
@@ -404,7 +431,9 @@ def build_video_index(video, rows):
         compact[n] = {}
 
         for gram, times in bucket.items():
-            unique = sorted(set(times))
+            unique = sorted(
+                set(times)
+            )
 
             if not unique:
                 continue
@@ -414,7 +443,10 @@ def build_video_index(video, rows):
             deltas.extend(
                 unique[i] - unique[i-1]
                 for i
-                in range(1, len(unique))
+                in range(
+                    1,
+                    len(unique)
+                )
             )
 
             compact[n][gram] = deltas
@@ -428,7 +460,10 @@ def build_video_index(video, rows):
 
 
 def needs_rebuild(video_id):
-    path = INDEX_DIR / f"{video_id}.json"
+    path = (
+        INDEX_DIR
+        / f"{video_id}.json"
+    )
 
     if not path.exists():
         return True
@@ -457,15 +492,30 @@ def rebuild_catalog(videos):
                 "videoId":
                     video["videoId"],
                 "title":
-                    video.get("title", ""),
+                    video.get(
+                        "title",
+                        ""
+                    ),
                 "channel":
-                    video.get("channel", ""),
+                    video.get(
+                        "channel",
+                        ""
+                    ),
                 "channelName":
-                    video.get("channelName", ""),
+                    video.get(
+                        "channelName",
+                        ""
+                    ),
                 "publishedAt":
-                    video.get("publishedAt", ""),
+                    video.get(
+                        "publishedAt",
+                        ""
+                    ),
                 "url":
-                    video.get("url", ""),
+                    video.get(
+                        "url",
+                        ""
+                    ),
             })
 
     save_json(
@@ -481,7 +531,10 @@ def rebuild_catalog(videos):
 
 def shard_for_gram(gram):
     return (
-        sum(ord(ch) for ch in gram)
+        sum(
+            ord(ch)
+            for ch in gram
+        )
         % GLOBAL_SHARDS
     )
 
@@ -495,7 +548,8 @@ def rebuild_global_index(videos):
 
     shards = [
         {}
-        for _ in range(GLOBAL_SHARDS)
+        for _
+        in range(GLOBAL_SHARDS)
     ]
 
     indexed_count = 0
@@ -510,12 +564,18 @@ def rebuild_global_index(videos):
             continue
 
         try:
-            idx = load_json(path, {})
+            idx = load_json(
+                path,
+                {}
+            )
         except Exception:
             continue
 
         if (
-            idx.get("version", 0)
+            idx.get(
+                "version",
+                0
+            )
             < INDEX_VERSION
         ):
             continue
@@ -534,7 +594,9 @@ def rebuild_global_index(videos):
                 .items()
             ):
                 shard = shards[
-                    shard_for_gram(gram)
+                    shard_for_gram(
+                        gram
+                    )
                 ]
 
                 key = f"{n}:{gram}"
@@ -549,15 +611,22 @@ def rebuild_global_index(videos):
         exist_ok=True
     )
 
-    for old in GLOBAL_DIR.glob(
-        "*.json"
+    for old in (
+        GLOBAL_DIR.glob(
+            "*.json"
+        )
     ):
-        if old.name != "manifest.json":
+        if (
+            old.name
+            != "manifest.json"
+        ):
             old.unlink()
 
     nonempty = []
 
-    for i, data in enumerate(shards):
+    for i, data in enumerate(
+        shards
+    ):
         if not data:
             continue
 
@@ -577,7 +646,8 @@ def rebuild_global_index(videos):
         GLOBAL_MANIFEST,
         {
             "version": 1,
-            "shards": GLOBAL_SHARDS,
+            "shards":
+                GLOBAL_SHARDS,
             "indexedVideos":
                 indexed_count,
             "nonemptyShards":
@@ -608,7 +678,10 @@ def main():
             STATUS_FILE,
             {}
         )
-        .get("videos", {})
+        .get(
+            "videos",
+            {}
+        )
     )
 
     attempts_data = load_json(
@@ -642,10 +715,12 @@ def main():
     eligible = [
         v
         for v in videos
+
         if (
             v.get("videoId")
             not in special_ids
         )
+
         and (
             status
             .get(
@@ -655,6 +730,7 @@ def main():
             .get("status")
             == "success"
         )
+
         and needs_rebuild(
             v.get("videoId")
         )
@@ -662,9 +738,14 @@ def main():
 
     eligible.sort(
         key=lambda v: (
-            v.get("publishedAt")
+            v.get(
+                "publishedAt"
+            )
             or "9999",
-            v.get("videoId")
+
+            v.get(
+                "videoId"
+            )
             or ""
         )
     )
@@ -708,6 +789,10 @@ def main():
         f"{len(candidates)}"
     )
 
+    processed = 0
+    indexed_this_run = 0
+    rate_limited = False
+
     for i, video in enumerate(
         candidates,
         1
@@ -720,76 +805,102 @@ def main():
             f"{video.get('title')}"
         )
 
-        mark_attempted = True
-
         try:
-            raw = fetch_transcript(vid)
+            raw = fetch_transcript(
+                vid
+            )
 
-            # -------------------------
-            # API利用制限を検出
-            # -------------------------
-
+            # 字幕取得先の利用制限を検出したら
+            # その回の処理を即終了する。
             if is_rate_limit_message(raw):
                 print(
                     "  rate limited by "
-                    "transcript provider; "
-                    "will retry later"
+                    "transcript provider"
                 )
 
-                # この動画は「処理済み」にしない
-                # 次回もう一度試す
-                mark_attempted = False
+                print(
+                    "  stopping this run "
+                    "to avoid further requests"
+                )
+
+                rate_limited = True
+                break
+
+            rows = parse_transcript(
+                raw
+            )
+
+            if not rows:
+                preview = (
+                    raw[:180]
+                    .replace(
+                        "\n",
+                        " "
+                    )
+                )
+
+                print(
+                    "  skipped: "
+                    "transcript could "
+                    "not be parsed"
+                )
+
+                print(
+                    "  transcript chars: "
+                    f"{len(raw)}"
+                )
+
+                print(
+                    "  transcript preview: "
+                    f"{preview}"
+                )
+
+                # 本物の解析失敗は
+                # 一巡後に再試行するため、
+                # 今回はattemptedへ記録する。
+                attempted.add(vid)
 
             else:
-                rows = parse_transcript(raw)
+                save_json(
+                    INDEX_DIR
+                    / f"{vid}.json",
 
-                if not rows:
-                    preview = (
-                        raw[:180]
-                        .replace("\n", " ")
+                    build_video_index(
+                        video,
+                        rows
                     )
+                )
 
-                    print(
-                        "  skipped: "
-                        "transcript could "
-                        "not be parsed"
-                    )
+                attempted.add(vid)
+                indexed_this_run += 1
 
-                    print(
-                        "  transcript chars: "
-                        f"{len(raw)}"
-                    )
+                print(
+                    f"  indexed "
+                    f"v{INDEX_VERSION}: "
+                    f"{len(rows)} "
+                    "transcript sections"
+                )
 
-                    print(
-                        "  transcript preview: "
-                        f"{preview}"
-                    )
+            processed += 1
 
-                else:
-                    save_json(
-                        INDEX_DIR
-                        / f"{vid}.json",
-                        build_video_index(
-                            video,
-                            rows
-                        )
-                    )
-
-                    print(
-                        f"  indexed "
-                        f"v{INDEX_VERSION}: "
-                        f"{len(rows)} "
-                        "transcript sections"
-                    )
+            save_json(
+                ATTEMPTS_FILE,
+                {
+                    "version": 1,
+                    "attempted":
+                        sorted(attempted)
+                }
+            )
 
         except urllib.error.HTTPError as e:
             print(
                 f"  HTTP {e.code}; "
-                "will retry later"
+                "stopping this run "
+                "and retrying later"
             )
 
-            # HTTPエラーも後で再試行
-            mark_attempted = False
+            rate_limited = True
+            break
 
         except Exception as e:
             print(
@@ -798,38 +909,41 @@ def main():
                 "will retry later"
             )
 
-            mark_attempted = False
-
-        if mark_attempted:
-            attempted.add(vid)
-
-        save_json(
-            ATTEMPTS_FILE,
-            {
-                "version": 1,
-                "attempted":
-                    sorted(attempted)
-            }
-        )
+            # 一時的な通信エラーなどは
+            # attemptedに入れず次回再試行。
+            processed += 1
 
         if i < len(candidates):
             time.sleep(
                 REQUEST_INTERVAL
             )
 
+    # レート制限された動画は
+    # attempted に追加していないため、
+    # 次回の実行で再び候補になる。
+
+    save_json(
+        ATTEMPTS_FILE,
+        {
+            "version": 1,
+            "attempted":
+                sorted(attempted)
+        }
+    )
+
     catalog_videos = (
         videos
         +
         [
             v
-            for v in SPECIAL_VIDEOS
-            if (
-                v["videoId"]
-                not in {
-                    x.get("videoId")
-                    for x in videos
-                }
-            )
+            for v
+            in SPECIAL_VIDEOS
+
+            if v["videoId"]
+            not in {
+                x.get("videoId")
+                for x in videos
+            }
         ]
     )
 
@@ -839,6 +953,25 @@ def main():
 
     rebuild_global_index(
         catalog_videos
+    )
+
+    print("")
+    print(
+        "Run summary:"
+    )
+
+    print(
+        f"  processed: {processed}"
+    )
+
+    print(
+        "  indexed this run: "
+        f"{indexed_this_run}"
+    )
+
+    print(
+        "  rate limited: "
+        f"{rate_limited}"
     )
 
     print(
