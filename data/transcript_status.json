@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1334,
-  "checkedVideos": 1334,
+  "totalVideos": 1335,
+  "checkedVideos": 1335,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8006,6 +8006,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 19895
+    },
+    "H2aWAx88QmI": {
+      "title": "【 Waterpark Simulator 】プールの経営だーっ！！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 42562
     }
   }
 }
