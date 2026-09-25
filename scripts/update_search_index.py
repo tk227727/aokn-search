@@ -10,7 +10,7 @@ VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
-ATTEMPTS_FILE = INDEX_DIR / "attempts.json")
+ATTEMPTS_FILE = INDEX_DIR / "attempts.json"
 
 GLOBAL_DIR = INDEX_DIR / "global"
 GLOBAL_MANIFEST = GLOBAL_DIR / "manifest.json"
