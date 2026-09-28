@@ -6,6 +6,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+
 VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
 INDEX_DIR = Path("data/search-index")
@@ -18,8 +19,6 @@ GLOBAL_SHARDS = 128
 
 INDEX_VERSION = 2
 MAX_VIDEOS_PER_RUN = 50
-
-# 通常時の字幕取得間隔
 REQUEST_INTERVAL = 20
 
 TRANSCRIPT_URL = (
@@ -280,9 +279,7 @@ def parse_transcript(raw):
                     break
 
                 if not next_line.isdigit():
-                    parts.append(
-                        next_line
-                    )
+                    parts.append(next_line)
 
                 i += 1
 
@@ -399,7 +396,7 @@ def grams(text, n):
         s[i:i+n]
         for i
         in range(
-            len(s)-n+1
+            len(s) - n + 1
         )
     }
 
@@ -441,7 +438,7 @@ def build_video_index(video, rows):
             deltas = [unique[0]]
 
             deltas.extend(
-                unique[i] - unique[i-1]
+                unique[i] - unique[i - 1]
                 for i
                 in range(
                     1,
@@ -715,12 +712,10 @@ def main():
     eligible = [
         v
         for v in videos
-
         if (
             v.get("videoId")
             not in special_ids
         )
-
         and (
             status
             .get(
@@ -730,7 +725,6 @@ def main():
             .get("status")
             == "success"
         )
-
         and needs_rebuild(
             v.get("videoId")
         )
@@ -742,7 +736,6 @@ def main():
                 "publishedAt"
             )
             or "9999",
-
             v.get(
                 "videoId"
             )
@@ -792,6 +785,7 @@ def main():
     processed = 0
     indexed_this_run = 0
     rate_limited = False
+    temporary_errors = 0
 
     for i, video in enumerate(
         candidates,
@@ -810,8 +804,8 @@ def main():
                 vid
             )
 
-            # 字幕取得先の利用制限を検出したら
-            # その回の処理を即終了する。
+            # HTTP 200でも高負荷メッセージが
+            # 返ってきた場合は全体を停止する。
             if is_rate_limit_message(raw):
                 print(
                     "  rate limited by "
@@ -855,16 +849,12 @@ def main():
                     f"{preview}"
                 )
 
-                # 本物の解析失敗は
-                # 一巡後に再試行するため、
-                # 今回はattemptedへ記録する。
                 attempted.add(vid)
 
             else:
                 save_json(
                     INDEX_DIR
                     / f"{vid}.json",
-
                     build_video_index(
                         video,
                         rows
@@ -893,34 +883,58 @@ def main():
             )
 
         except urllib.error.HTTPError as e:
+
+            # 429 = Too Many Requests
+            # 明確なレート制限なので、
+            # その回の処理を終了する。
+            if e.code == 429:
+                print(
+                    "  HTTP 429: "
+                    "rate limited by "
+                    "transcript provider"
+                )
+
+                print(
+                    "  stopping this run "
+                    "to avoid further requests"
+                )
+
+                rate_limited = True
+                break
+
+            # 502など429以外のHTTPエラーは、
+            # その動画だけ一時的に失敗した
+            # 可能性があるため次へ進む。
             print(
                 f"  HTTP {e.code}; "
-                "stopping this run "
+                "skipping this video "
                 "and retrying later"
             )
 
-            rate_limited = True
-            break
+            temporary_errors += 1
+            processed += 1
+
+            # attemptedには追加しない。
+            # そのため後の実行で再挑戦できる。
 
         except Exception as e:
             print(
                 "  error: "
                 f"{str(e)[:300]}; "
-                "will retry later"
+                "skipping this video "
+                "and retrying later"
             )
 
-            # 一時的な通信エラーなどは
-            # attemptedに入れず次回再試行。
+            temporary_errors += 1
             processed += 1
+
+            # 一時的な通信エラーなども
+            # attemptedには追加しない。
 
         if i < len(candidates):
             time.sleep(
                 REQUEST_INTERVAL
             )
-
-    # レート制限された動画は
-    # attempted に追加していないため、
-    # 次回の実行で再び候補になる。
 
     save_json(
         ATTEMPTS_FILE,
@@ -938,7 +952,6 @@ def main():
             v
             for v
             in SPECIAL_VIDEOS
-
             if v["videoId"]
             not in {
                 x.get("videoId")
@@ -967,6 +980,11 @@ def main():
     print(
         "  indexed this run: "
         f"{indexed_this_run}"
+    )
+
+    print(
+        "  temporary HTTP/errors: "
+        f"{temporary_errors}"
     )
 
     print(
