@@ -9,12 +9,15 @@ from pathlib import Path
 
 VIDEOS_FILE = Path("data/videos.json")
 STATUS_FILE = Path("data/transcript_status.json")
+
 INDEX_DIR = Path("data/search-index")
 CATALOG_FILE = INDEX_DIR / "catalog.json"
 ATTEMPTS_FILE = INDEX_DIR / "attempts.json"
+RETRY_STATUS_FILE = INDEX_DIR / "retry_status.json"
 
 GLOBAL_DIR = INDEX_DIR / "global"
 GLOBAL_MANIFEST = GLOBAL_DIR / "manifest.json"
+
 GLOBAL_SHARDS = 128
 
 INDEX_VERSION = 2
@@ -51,8 +54,11 @@ def load_json(path, default):
     if not path.exists():
         return default
 
-    with path.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default
 
 
 def save_json(path, data):
@@ -428,9 +434,7 @@ def build_video_index(video, rows):
         compact[n] = {}
 
         for gram, times in bucket.items():
-            unique = sorted(
-                set(times)
-            )
+            unique = sorted(set(times))
 
             if not unique:
                 continue
@@ -439,8 +443,7 @@ def build_video_index(video, rows):
 
             deltas.extend(
                 unique[i] - unique[i - 1]
-                for i
-                in range(
+                for i in range(
                     1,
                     len(unique)
                 )
@@ -489,38 +492,22 @@ def rebuild_catalog(videos):
                 "videoId":
                     video["videoId"],
                 "title":
-                    video.get(
-                        "title",
-                        ""
-                    ),
+                    video.get("title", ""),
                 "channel":
-                    video.get(
-                        "channel",
-                        ""
-                    ),
+                    video.get("channel", ""),
                 "channelName":
-                    video.get(
-                        "channelName",
-                        ""
-                    ),
+                    video.get("channelName", ""),
                 "publishedAt":
-                    video.get(
-                        "publishedAt",
-                        ""
-                    ),
+                    video.get("publishedAt", ""),
                 "url":
-                    video.get(
-                        "url",
-                        ""
-                    ),
+                    video.get("url", ""),
             })
 
     save_json(
         CATALOG_FILE,
         {
             "version": INDEX_VERSION,
-            "indexedVideos":
-                len(indexed),
+            "indexedVideos": len(indexed),
             "videos": indexed,
         }
     )
@@ -528,10 +515,7 @@ def rebuild_catalog(videos):
 
 def shard_for_gram(gram):
     return (
-        sum(
-            ord(ch)
-            for ch in gram
-        )
+        sum(ord(ch) for ch in gram)
         % GLOBAL_SHARDS
     )
 
@@ -545,8 +529,7 @@ def rebuild_global_index(videos):
 
     shards = [
         {}
-        for _
-        in range(GLOBAL_SHARDS)
+        for _ in range(GLOBAL_SHARDS)
     ]
 
     indexed_count = 0
@@ -561,18 +544,12 @@ def rebuild_global_index(videos):
             continue
 
         try:
-            idx = load_json(
-                path,
-                {}
-            )
+            idx = load_json(path, {})
         except Exception:
             continue
 
         if (
-            idx.get(
-                "version",
-                0
-            )
+            idx.get("version", 0)
             < INDEX_VERSION
         ):
             continue
@@ -591,9 +568,7 @@ def rebuild_global_index(videos):
                 .items()
             ):
                 shard = shards[
-                    shard_for_gram(
-                        gram
-                    )
+                    shard_for_gram(gram)
                 ]
 
                 key = f"{n}:{gram}"
@@ -608,22 +583,13 @@ def rebuild_global_index(videos):
         exist_ok=True
     )
 
-    for old in (
-        GLOBAL_DIR.glob(
-            "*.json"
-        )
-    ):
-        if (
-            old.name
-            != "manifest.json"
-        ):
+    for old in GLOBAL_DIR.glob("*.json"):
+        if old.name != "manifest.json":
             old.unlink()
 
     nonempty = []
 
-    for i, data in enumerate(
-        shards
-    ):
+    for i, data in enumerate(shards):
         if not data:
             continue
 
@@ -643,12 +609,9 @@ def rebuild_global_index(videos):
         GLOBAL_MANIFEST,
         {
             "version": 1,
-            "shards":
-                GLOBAL_SHARDS,
-            "indexedVideos":
-                indexed_count,
-            "nonemptyShards":
-                nonempty,
+            "shards": GLOBAL_SHARDS,
+            "indexedVideos": indexed_count,
+            "nonemptyShards": nonempty,
         }
     )
 
@@ -657,6 +620,27 @@ def rebuild_global_index(videos):
         f"{indexed_count} videos / "
         f"{len(nonempty)} shards"
     )
+
+
+def record_retry(
+    retry_status,
+    video_id,
+    reason
+):
+    item = retry_status.setdefault(
+        video_id,
+        {
+            "attempts": 0,
+            "lastResult": ""
+        }
+    )
+
+    item["attempts"] = (
+        int(item.get("attempts", 0))
+        + 1
+    )
+
+    item["lastResult"] = reason
 
 
 def main():
@@ -675,106 +659,102 @@ def main():
             STATUS_FILE,
             {}
         )
-        .get(
-            "videos",
-            {}
-        )
+        .get("videos", {})
     )
 
-    attempts_data = load_json(
-        ATTEMPTS_FILE,
+    retry_data = load_json(
+        RETRY_STATUS_FILE,
         {
             "version": 1,
-            "attempted": []
+            "videos": {}
         }
     )
 
-    attempted = set(
-        attempts_data.get(
-            "attempted",
-            []
-        )
+    retry_status = retry_data.get(
+        "videos",
+        {}
     )
 
-    special = [
-        v
-        for v in SPECIAL_VIDEOS
-        if needs_rebuild(
-            v["videoId"]
+    catalog_videos = (
+        videos
+        +
+        [
+            v
+            for v in SPECIAL_VIDEOS
+            if v["videoId"]
+            not in {
+                x.get("videoId")
+                for x in videos
+            }
+        ]
+    )
+
+    # まだインデックスが完成していない
+    # 動画だけを対象にする。
+    eligible = []
+
+    for video in catalog_videos:
+        vid = video.get("videoId")
+
+        if not vid:
+            continue
+
+        is_special = (
+            vid in {
+                x["videoId"]
+                for x in SPECIAL_VIDEOS
+            }
         )
-    ]
 
-    special_ids = {
-        v["videoId"]
-        for v in SPECIAL_VIDEOS
-    }
-
-    eligible = [
-        v
-        for v in videos
         if (
-            v.get("videoId")
-            not in special_ids
-        )
-        and (
-            status
-            .get(
-                v.get("videoId"),
-                {}
-            )
+            not is_special
+            and status
+            .get(vid, {})
             .get("status")
-            == "success"
-        )
-        and needs_rebuild(
-            v.get("videoId")
-        )
-    ]
+            != "success"
+        ):
+            continue
 
+        if needs_rebuild(vid):
+            eligible.append(video)
+
+    # 試行回数が少ない動画を優先。
+    # 同じ回数なら古い動画から。
     eligible.sort(
         key=lambda v: (
-            v.get(
-                "publishedAt"
+            retry_status
+            .get(
+                v["videoId"],
+                {}
             )
+            .get("attempts", 0),
+
+            v.get("publishedAt")
             or "9999",
-            v.get(
-                "videoId"
-            )
+
+            v.get("videoId")
             or ""
         )
     )
 
-    fresh = [
-        v
-        for v in eligible
-        if (
-            v.get("videoId")
-            not in attempted
-        )
-    ]
-
-    if fresh:
-        normal = fresh
-        phase = "first-pass"
-    else:
-        attempted.clear()
-        normal = eligible
-        phase = "retry-pass"
-
     candidates = (
-        special + normal
-    )[:MAX_VIDEOS_PER_RUN]
-
-    print(
-        f"Videos: {len(videos)}"
+        eligible[
+            :MAX_VIDEOS_PER_RUN
+        ]
     )
 
     print(
-        "Eligible unindexed videos: "
+        "Recovery mode: enabled"
+    )
+
+    print(
+        "Total source videos: "
+        f"{len(catalog_videos)}"
+    )
+
+    print(
+        "Still missing indexes: "
         f"{len(eligible)}"
-    )
-
-    print(
-        f"Pass: {phase}"
     )
 
     print(
@@ -784,8 +764,9 @@ def main():
 
     processed = 0
     indexed_this_run = 0
-    rate_limited = False
     temporary_errors = 0
+    parse_failures = 0
+    rate_limited = False
 
     for i, video in enumerate(
         candidates,
@@ -793,19 +774,25 @@ def main():
     ):
         vid = video["videoId"]
 
+        previous_attempts = (
+            retry_status
+            .get(
+                vid,
+                {}
+            )
+            .get("attempts", 0)
+        )
+
         print(
             f"[{i}/{len(candidates)}] "
+            f"attempt {previous_attempts + 1} / "
             f"{video.get('channelName')} / "
             f"{video.get('title')}"
         )
 
         try:
-            raw = fetch_transcript(
-                vid
-            )
+            raw = fetch_transcript(vid)
 
-            # HTTP 200でも高負荷メッセージが
-            # 返ってきた場合は全体を停止する。
             if is_rate_limit_message(raw):
                 print(
                     "  rate limited by "
@@ -820,23 +807,19 @@ def main():
                 rate_limited = True
                 break
 
-            rows = parse_transcript(
-                raw
-            )
+            rows = parse_transcript(raw)
 
             if not rows:
                 preview = (
                     raw[:180]
-                    .replace(
-                        "\n",
-                        " "
-                    )
+                    .replace("\n", " ")
                 )
 
                 print(
-                    "  skipped: "
-                    "transcript could "
-                    "not be parsed"
+                    "  transcript could "
+                    "not be parsed; "
+                    "will retry in a "
+                    "future run"
                 )
 
                 print(
@@ -849,7 +832,13 @@ def main():
                     f"{preview}"
                 )
 
-                attempted.add(vid)
+                record_retry(
+                    retry_status,
+                    vid,
+                    "parse_failure"
+                )
+
+                parse_failures += 1
 
             else:
                 save_json(
@@ -861,7 +850,12 @@ def main():
                     )
                 )
 
-                attempted.add(vid)
+                # 成功したら失敗履歴から削除。
+                retry_status.pop(
+                    vid,
+                    None
+                )
+
                 indexed_this_run += 1
 
                 print(
@@ -873,20 +867,8 @@ def main():
 
             processed += 1
 
-            save_json(
-                ATTEMPTS_FILE,
-                {
-                    "version": 1,
-                    "attempted":
-                        sorted(attempted)
-                }
-            )
-
         except urllib.error.HTTPError as e:
 
-            # 429 = Too Many Requests
-            # 明確なレート制限なので、
-            # その回の処理を終了する。
             if e.code == 429:
                 print(
                     "  HTTP 429: "
@@ -902,34 +884,45 @@ def main():
                 rate_limited = True
                 break
 
-            # 502など429以外のHTTPエラーは、
-            # その動画だけ一時的に失敗した
-            # 可能性があるため次へ進む。
             print(
                 f"  HTTP {e.code}; "
-                "skipping this video "
-                "and retrying later"
+                "will retry in a "
+                "future run"
+            )
+
+            record_retry(
+                retry_status,
+                vid,
+                f"http_{e.code}"
             )
 
             temporary_errors += 1
             processed += 1
-
-            # attemptedには追加しない。
-            # そのため後の実行で再挑戦できる。
 
         except Exception as e:
             print(
                 "  error: "
                 f"{str(e)[:300]}; "
-                "skipping this video "
-                "and retrying later"
+                "will retry in a "
+                "future run"
+            )
+
+            record_retry(
+                retry_status,
+                vid,
+                "temporary_error"
             )
 
             temporary_errors += 1
             processed += 1
 
-            # 一時的な通信エラーなども
-            # attemptedには追加しない。
+        save_json(
+            RETRY_STATUS_FILE,
+            {
+                "version": 1,
+                "videos": retry_status
+            }
+        )
 
         if i < len(candidates):
             time.sleep(
@@ -937,27 +930,11 @@ def main():
             )
 
     save_json(
-        ATTEMPTS_FILE,
+        RETRY_STATUS_FILE,
         {
             "version": 1,
-            "attempted":
-                sorted(attempted)
+            "videos": retry_status
         }
-    )
-
-    catalog_videos = (
-        videos
-        +
-        [
-            v
-            for v
-            in SPECIAL_VIDEOS
-            if v["videoId"]
-            not in {
-                x.get("videoId")
-                for x in videos
-            }
-        ]
     )
 
     rebuild_catalog(
@@ -968,10 +945,49 @@ def main():
         catalog_videos
     )
 
-    print("")
-    print(
-        "Run summary:"
+    # この実行後に残っている本数を再計算。
+    remaining = sum(
+        1
+        for video in catalog_videos
+        if (
+            video.get("videoId")
+            and needs_rebuild(
+                video["videoId"]
+            )
+            and (
+                video["videoId"]
+                in {
+                    x["videoId"]
+                    for x in SPECIAL_VIDEOS
+                }
+                or status
+                .get(
+                    video["videoId"],
+                    {}
+                )
+                .get("status")
+                == "success"
+            )
+        )
     )
+
+    retry_counts = {}
+
+    for item in retry_status.values():
+        count = int(
+            item.get("attempts", 0)
+        )
+
+        retry_counts[count] = (
+            retry_counts.get(
+                count,
+                0
+            )
+            + 1
+        )
+
+    print("")
+    print("Recovery summary:")
 
     print(
         f"  processed: {processed}"
@@ -980,6 +996,11 @@ def main():
     print(
         "  indexed this run: "
         f"{indexed_this_run}"
+    )
+
+    print(
+        "  parse failures: "
+        f"{parse_failures}"
     )
 
     print(
@@ -993,11 +1014,43 @@ def main():
     )
 
     print(
+        "  indexes still missing: "
+        f"{remaining}"
+    )
+
+    if retry_counts:
+        print(
+            "  retry history:"
+        )
+
+        for count in sorted(
+            retry_counts
+        ):
+            print(
+                f"    failed {count} "
+                f"time(s): "
+                f"{retry_counts[count]} "
+                "video(s)"
+            )
+
+    else:
+        print(
+            "  retry history: none"
+        )
+
+    if remaining == 0:
+        print("")
+        print(
+            "ALL ELIGIBLE VIDEOS "
+            "ARE INDEXED."
+        )
+
+    print(
         f"Saved {CATALOG_FILE}"
     )
 
     print(
-        f"Saved {ATTEMPTS_FILE}"
+        f"Saved {RETRY_STATUS_FILE}"
     )
 
 
