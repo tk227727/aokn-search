@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1335,
-  "checkedVideos": 1335,
+  "totalVideos": 1336,
+  "checkedVideos": 1336,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8012,6 +8012,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 42562
+    },
+    "FHaow6kc-Gg": {
+      "title": "【 Don't Drop The Cake 】ケーキを運ぶ！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 239
     }
   }
 }
