@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1336,
-  "checkedVideos": 1336,
+  "totalVideos": 1337,
+  "checkedVideos": 1337,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8018,6 +8018,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 239
+    },
+    "eH7o6DetM6s": {
+      "title": "【 Machine Party 】ReGLOSSで友情破壊ゲーム！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 31871
     }
   }
 }
