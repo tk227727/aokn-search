@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 673,
+      "videoCount": 674,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "8NBNd9TQWUs",
+      "title": "【 雑談 】ｳｷｳｷ雑談【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-04T09:22:04Z",
+      "durationSeconds": 6614,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=8NBNd9TQWUs"
+    },
     {
       "videoId": "eH7o6DetM6s",
       "title": "【 Machine Party 】ReGLOSSで友情破壊ゲーム！！【音乃瀬奏】#ReGLOSS",
