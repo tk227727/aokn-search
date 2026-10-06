@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1338,
-  "checkedVideos": 1338,
+  "totalVideos": 1339,
+  "checkedVideos": 1339,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8030,6 +8030,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 65186
+    },
+    "wlEdW6vxWE8": {
+      "title": "【 回転寿司シミュレーター 】へいいらっしゃい～！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 57441
     }
   }
 }
