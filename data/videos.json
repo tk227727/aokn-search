@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 675,
+      "videoCount": 676,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "irjNowlxPMc",
+      "title": "【 歌枠 】rakuを使ってゆるく歌ってみる【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-06T12:36:48Z",
+      "durationSeconds": 3678,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=irjNowlxPMc"
+    },
     {
       "videoId": "wlEdW6vxWE8",
       "title": "【 回転寿司シミュレーター 】へいいらっしゃい～！【音乃瀬奏】#ReGLOSS",
