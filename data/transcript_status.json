@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1339,
-  "checkedVideos": 1339,
+  "totalVideos": 1340,
+  "checkedVideos": 1340,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8036,6 +8036,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 57441
+    },
+    "irjNowlxPMc": {
+      "title": "【 歌枠 】rakuを使ってゆるく歌ってみる【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 26435
     }
   }
 }
