@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1340,
-  "checkedVideos": 1340,
+  "totalVideos": 1343,
+  "checkedVideos": 1343,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8042,6 +8042,24 @@
       "channel": "kanade",
       "status": "success",
       "length": 26435
+    },
+    "GN0q9XzjmA8": {
+      "title": "【 ホロドリ 】しゅぴなでドドドで突発ホロドリ？！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 585
+    },
+    "2dyp860Va10": {
+      "title": "【 BOMBANANA! 】見れない、聞けない、喋れない爆弾解除！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 594
+    },
+    "HyYRxpqKoY0": {
+      "title": "【 Waterpark Simulator 】アヒヨコでプール経営！！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "success",
+      "length": 36959
     }
   }
 }
