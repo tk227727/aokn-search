@@ -22,11 +22,41 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 676,
+      "videoCount": 679,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "GN0q9XzjmA8",
+      "title": "【 ホロドリ 】しゅぴなでドドドで突発ホロドリ？！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-07T16:15:46Z",
+      "durationSeconds": 3952,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=GN0q9XzjmA8"
+    },
+    {
+      "videoId": "2dyp860Va10",
+      "title": "【 BOMBANANA! 】見れない、聞けない、喋れない爆弾解除！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-07T14:24:39Z",
+      "durationSeconds": 4632,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=2dyp860Va10"
+    },
+    {
+      "videoId": "HyYRxpqKoY0",
+      "title": "【 Waterpark Simulator 】アヒヨコでプール経営！！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-07T10:57:39Z",
+      "durationSeconds": 6285,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=HyYRxpqKoY0"
+    },
     {
       "videoId": "irjNowlxPMc",
       "title": "【 歌枠 】rakuを使ってゆるく歌ってみる【音乃瀬奏】#ReGLOSS",
