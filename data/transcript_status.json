@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1343,
-  "checkedVideos": 1343,
+  "totalVideos": 1344,
+  "checkedVideos": 1344,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8060,6 +8060,12 @@
       "channel": "kanade",
       "status": "success",
       "length": 36959
+    },
+    "J5ArluZmg5o": {
+      "title": "【 ホロドリ 】ReGLOSSでミニゲーム遊ぶぞおおおー！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
     }
   }
 }
