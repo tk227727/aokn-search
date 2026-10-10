@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 679,
+      "videoCount": 680,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "J5ArluZmg5o",
+      "title": "【 ホロドリ 】ReGLOSSでミニゲーム遊ぶぞおおおー！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-10T15:24:36Z",
+      "durationSeconds": 4392,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=J5ArluZmg5o"
+    },
     {
       "videoId": "GN0q9XzjmA8",
       "title": "【 ホロドリ 】しゅぴなでドドドで突発ホロドリ？！【音乃瀬奏】#ReGLOSS",
