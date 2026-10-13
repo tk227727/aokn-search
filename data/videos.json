@@ -22,11 +22,31 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 680,
+      "videoCount": 682,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "QvUi6KG4FRI",
+      "title": "【 #音乃瀬奏AcousticLive 】重大告知アリ！セルフ3D×ピアノ生演奏ライブ！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-12T11:11:36Z",
+      "durationSeconds": 3657,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=QvUi6KG4FRI"
+    },
+    {
+      "videoId": "LjuKylF4udw",
+      "title": "音乃瀬奏 - アイシカケ (Official MV)",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-12T11:00:09Z",
+      "durationSeconds": 198,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=LjuKylF4udw"
+    },
     {
       "videoId": "J5ArluZmg5o",
       "title": "【 ホロドリ 】ReGLOSSでミニゲーム遊ぶぞおおおー！！【音乃瀬奏】#ReGLOSS",
