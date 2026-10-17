@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 684,
+      "videoCount": 685,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "zsEJmq-XZzI",
+      "title": "【 ホロドリ 】新エリアに行きたい！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-17T14:42:26Z",
+      "durationSeconds": 9088,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=zsEJmq-XZzI"
+    },
     {
       "videoId": "zp9UdcG9VwU",
       "title": "【 雑談 】アコースティックライブお疲れ様でした～新曲聞いてくれたカナ？！で～【音乃瀬奏】#ReGLOSS",
