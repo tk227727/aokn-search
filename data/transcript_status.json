@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1350,
-  "checkedVideos": 1350,
+  "totalVideos": 1351,
+  "checkedVideos": 1351,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8099,6 +8099,12 @@
     },
     "gX9AoYgK46A": {
       "title": "【 #歌うまスンギ歌枠リレー   】【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "Z3lDXrbqiPM": {
+      "title": "【 ショート雑談 】ねむねむだけどしゃべりたい！【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
