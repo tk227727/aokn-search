@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 686,
+      "videoCount": 687,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "Z3lDXrbqiPM",
+      "title": "【 ショート雑談 】ねむねむだけどしゃべりたい！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-21T11:32:11Z",
+      "durationSeconds": 2840,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=Z3lDXrbqiPM"
+    },
     {
       "videoId": "gX9AoYgK46A",
       "title": "【 #歌うまスンギ歌枠リレー   】【音乃瀬奏】#ReGLOSS",
