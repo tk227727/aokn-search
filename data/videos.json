@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 687,
+      "videoCount": 688,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "M1ng1FFbc4s",
+      "title": "【 タンポポは耐える。 】耐えてみます【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-10-27T12:39:47Z",
+      "durationSeconds": 4330,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=M1ng1FFbc4s"
+    },
     {
       "videoId": "Z3lDXrbqiPM",
       "title": "【 ショート雑談 】ねむねむだけどしゃべりたい！【音乃瀬奏】#ReGLOSS",
