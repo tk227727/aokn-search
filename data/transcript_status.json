@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1352,
-  "checkedVideos": 1352,
+  "totalVideos": 1353,
+  "checkedVideos": 1353,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8111,6 +8111,12 @@
     },
     "M1ng1FFbc4s": {
       "title": "【 タンポポは耐える。 】耐えてみます【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "YUnpx-WpTGA": {
+      "title": "【 歌枠 】ゆるくゆるく【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
