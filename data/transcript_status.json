@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1353,
-  "checkedVideos": 1353,
+  "totalVideos": 1354,
+  "checkedVideos": 1354,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8117,6 +8117,12 @@
     },
     "YUnpx-WpTGA": {
       "title": "【 歌枠 】ゆるくゆるく【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "0j6ZTJh4sSU": {
+      "title": "【 Japanese Ramen Simulator 】ラーメンが売れないわけがない！しゅぴなで【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
