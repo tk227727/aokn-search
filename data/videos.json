@@ -22,11 +22,31 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 691,
+      "videoCount": 693,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "zbFZibUVohA",
+      "title": "【 球ひろいSimulator 】球拾いになるぜい！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-11-06T14:36:29Z",
+      "durationSeconds": 3892,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=zbFZibUVohA"
+    },
+    {
+      "videoId": "T2qTYSS8rvo",
+      "title": "【 球ひろいSimulator 】球拾いになるぜい！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-11-06T13:25:41Z",
+      "durationSeconds": 1235,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=T2qTYSS8rvo"
+    },
     {
       "videoId": "f8qeTQ6WWsI",
       "title": "【 Supermarket Chaos 】我が家のよう【音乃瀬奏】#ReGLOSS",
