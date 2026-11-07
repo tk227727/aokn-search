@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1355,
-  "checkedVideos": 1355,
+  "totalVideos": 1357,
+  "checkedVideos": 1357,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8129,6 +8129,18 @@
     },
     "f8qeTQ6WWsI": {
       "title": "【 Supermarket Chaos 】我が家のよう【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "zbFZibUVohA": {
+      "title": "【 球ひろいSimulator 】球拾いになるぜい！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "T2qTYSS8rvo": {
+      "title": "【 球ひろいSimulator 】球拾いになるぜい！【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
