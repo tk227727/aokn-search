@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1357,
-  "checkedVideos": 1357,
+  "totalVideos": 1358,
+  "checkedVideos": 1358,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8141,6 +8141,12 @@
     },
     "T2qTYSS8rvo": {
       "title": "【 球ひろいSimulator 】球拾いになるぜい！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "Ze6c6QIuRFQ": {
+      "title": "【 #ホロ1GP 】初の競馬？！ビギナーズラックックー！！【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
