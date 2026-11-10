@@ -22,11 +22,31 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 694,
+      "videoCount": 696,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "ylu_LekLETs",
+      "title": "【 R.E.P.O. 】お宝を沢山集めてお金持ちになる！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-11-10T16:31:31Z",
+      "durationSeconds": 11189,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=ylu_LekLETs"
+    },
+    {
+      "videoId": "U6DYgg1GQ-8",
+      "title": "【 R.E.P.O. 】お宝を沢山集めてお金持ちになる！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-11-10T13:16:25Z",
+      "durationSeconds": 784,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=U6DYgg1GQ-8"
+    },
     {
       "videoId": "Ze6c6QIuRFQ",
       "title": "【 #ホロ1GP 】初の競馬？！ビギナーズラックックー！！【音乃瀬奏】#ReGLOSS",
