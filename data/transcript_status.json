@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1360,
-  "checkedVideos": 1360,
+  "totalVideos": 1361,
+  "checkedVideos": 1361,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8159,6 +8159,12 @@
     },
     "U6DYgg1GQ-8": {
       "title": "【 R.E.P.O. 】お宝を沢山集めてお金持ちになる！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "iXvyuuPr2E4": {
+      "title": "【 めっちゃカメレオン 】お絵描きしてかくれんぼ！【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
