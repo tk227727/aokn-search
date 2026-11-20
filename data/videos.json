@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 698,
+      "videoCount": 699,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "7sy-VCMi4J0",
+      "title": "【 雑談 】リハーサルとミーグリしてきた！！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-11-20T16:00:16Z",
+      "durationSeconds": 4979,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=7sy-VCMi4J0"
+    },
     {
       "videoId": "RbzIf9P1-3c",
       "title": "【 One Million Coins 】3rdオリ曲『アイシカケ』、100万再生ありがとう！の100万円集めます。【音乃瀬奏】#ReGLOSS",
