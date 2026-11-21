@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 699,
+      "videoCount": 700,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "0ec1ExVhabE",
+      "title": "【 絶対遵守 】ルールを破れば即死？！やってみるううう！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-11-21T16:18:12Z",
+      "durationSeconds": 10961,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=0ec1ExVhabE"
+    },
     {
       "videoId": "7sy-VCMi4J0",
       "title": "【 雑談 】リハーサルとミーグリしてきた！！！【音乃瀬奏】#ReGLOSS",
