@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1362,
-  "checkedVideos": 1362,
+  "totalVideos": 1363,
+  "checkedVideos": 1363,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8171,6 +8171,12 @@
     },
     "RbzIf9P1-3c": {
       "title": "【 One Million Coins 】3rdオリ曲『アイシカケ』、100万再生ありがとう！の100万円集めます。【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "7sy-VCMi4J0": {
+      "title": "【 雑談 】リハーサルとミーグリしてきた！！！【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
