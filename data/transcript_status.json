@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1363,
-  "checkedVideos": 1363,
+  "totalVideos": 1364,
+  "checkedVideos": 1364,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8177,6 +8177,12 @@
     },
     "7sy-VCMi4J0": {
       "title": "【 雑談 】リハーサルとミーグリしてきた！！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "0ec1ExVhabE": {
+      "title": "【 絶対遵守 】ルールを破れば即死？！やってみるううう！！【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
