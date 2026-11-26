@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "totalVideos": 1364,
-  "checkedVideos": 1364,
+  "totalVideos": 1365,
+  "checkedVideos": 1365,
   "videos": {
     "QOt5V8Q4OV0": {
       "title": "【#ReGLOSS3周年】ReGLOSS Memorial Award この1年の活動を表彰！",
@@ -8183,6 +8183,12 @@
     },
     "0ec1ExVhabE": {
       "title": "【 絶対遵守 】ルールを破れば即死？！やってみるううう！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "status": "http_error",
+      "httpCode": 401
+    },
+    "rs44AukeOIU": {
+      "title": "【 脱毛サロンシミュレーター 】ピリピリ脱毛タイム！！！【音乃瀬奏】#ReGLOSS",
       "channel": "kanade",
       "status": "http_error",
       "httpCode": 401
