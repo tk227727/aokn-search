@@ -22,11 +22,21 @@
       "handle": "@otonosekanade",
       "channelId": "UCWQtYtq9EOB4-I5P-3fh8lA",
       "uploadsPlaylistId": "UUWQtYtq9EOB4-I5P-3fh8lA",
-      "videoCount": 700,
+      "videoCount": 701,
       "autoUpdate": true
     }
   },
   "videos": [
+    {
+      "videoId": "rs44AukeOIU",
+      "title": "【 脱毛サロンシミュレーター 】ピリピリ脱毛タイム！！！【音乃瀬奏】#ReGLOSS",
+      "channel": "kanade",
+      "channelName": "音乃瀬奏",
+      "publishedAt": "2026-11-25T12:08:14Z",
+      "durationSeconds": 6642,
+      "isLiveArchive": true,
+      "url": "https://www.youtube.com/watch?v=rs44AukeOIU"
+    },
     {
       "videoId": "0ec1ExVhabE",
       "title": "【 絶対遵守 】ルールを破れば即死？！やってみるううう！！【音乃瀬奏】#ReGLOSS",
